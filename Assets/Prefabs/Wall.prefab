@@ -29,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 5555394541824035416}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -2.55, y: 0, z: 0}
-  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 7147282915260107687}
   m_Father: {fileID: 0}
@@ -72,6 +72,8 @@ MonoBehaviour:
   blackMaterial: {fileID: 2100000, guid: 4920a741dceb2134cbff56dd9beee036, type: 2}
   whiteMaterial: {fileID: 2100000, guid: 75f78f9f453c9e8449d4f4984b4f429c, type: 2}
   meshRenderer: {fileID: 638909924162010815}
+  boxCollider: {fileID: 5555394541824035414}
+  navMeshModifierVolume: {fileID: 5555394541646317552}
 --- !u!114 &5555394541646317552
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -84,7 +86,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35e95dc5ff2b64380880dd7ac5922847, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Size: {x: 2, y: 4, z: 2}
+  m_Size: {x: 1, y: 4, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
   m_Area: 3
   m_AffectedAgents: ffffffff

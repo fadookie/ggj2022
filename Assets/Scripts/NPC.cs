@@ -29,6 +29,7 @@ public class NPC : MonoBehaviour
 
     protected void Start() {
         navMeshAgent = GetComponent<NavMeshAgent>();
+        Update();
     }
 
     protected void Update()
@@ -38,37 +39,45 @@ public class NPC : MonoBehaviour
             meshRenderer.material = GetMaterial();
         }
         gameObject.layer = GetNPCLayer();
-
-        var playerPos = Player.Instance.ObservablePosition.Value;
-        var playerColor = Player.Instance.CurrentColor;
-        var distanceToPlayer = Vector3.Distance(playerPos, transform.position);
-        if (distanceToPlayer > playerNoticeDistance) {
-            // Wander around
-            if (wanderRoutine == null) {
-                wanderRoutine = StartCoroutine(Wander());
-            }
-        } else {
-            if (wanderRoutine != null) {
-                StopCoroutine(wanderRoutine);
-                wanderRoutine = null;
-            }
-                    if (!playerColor.Equals(color))
-                    {
-        //                Debug.Log(string.Format("NPC {0} run away from player {1}", color, playerColor));
-                // run away
-                var awayFromPlayer = (transform.position - playerPos).normalized * 20;
-                NavMeshHit closestHit;
-                if (NavMesh.SamplePosition(awayFromPlayer, out closestHit, 100f,
-                            navMeshAgent.areaMask))
-                        {
-                    SafeSetDestination(closestHit.position);
+        navMeshAgent.areaMask = GetNPCAreaMask();
+        if (Application.isPlaying)
+        {
+            var playerPos = Player.Instance.ObservablePosition.Value;
+            var playerColor = Player.Instance.CurrentColor;
+            var distanceToPlayer = Vector3.Distance(playerPos, transform.position);
+            if (distanceToPlayer > playerNoticeDistance)
+            {
+                // Wander around
+                if (wanderRoutine == null)
+                {
+                    wanderRoutine = StartCoroutine(Wander());
                 }
-                    }
-                    else
+            }
+            else
+            {
+                if (wanderRoutine != null)
+                {
+                    StopCoroutine(wanderRoutine);
+                    wanderRoutine = null;
+                }
+                if (!playerColor.Equals(color))
+                {
+                    //                Debug.Log(string.Format("NPC {0} run away from player {1}", color, playerColor));
+                    // run away
+                    var awayFromPlayer = (transform.position - playerPos).normalized * 20;
+                    NavMeshHit closestHit;
+                    if (NavMesh.SamplePosition(awayFromPlayer, out closestHit, 100f,
+                                navMeshAgent.areaMask))
                     {
-        //                Debug.Log(string.Format("NPC {0} chase player {1}", color, playerColor));
-                // chase player
-                SafeSetDestination(playerPos);
+                        SafeSetDestination(closestHit.position);
+                    }
+                }
+                else
+                {
+                    //                Debug.Log(string.Format("NPC {0} chase player {1}", color, playerColor));
+                    // chase player
+                    SafeSetDestination(playerPos);
+                }
             }
         }
     }
@@ -108,6 +117,17 @@ public class NPC : MonoBehaviour
         {
             case GameColor.Black: return LayerMask.NameToLayer("Black NPC");
             case GameColor.White: return LayerMask.NameToLayer("White NPC");
+            default: throw new System.NotFiniteNumberException();
+        }
+    }
+
+
+    private int GetNPCAreaMask()
+    {
+        switch (color)
+        {
+            case GameColor.Black: return NavAreaTypeUtil.CreateMask(NavAreaType.Walkable, NavAreaType.Jump, NavAreaType.BlackDoor);
+            case GameColor.White: return NavAreaTypeUtil.CreateMask(NavAreaType.Walkable, NavAreaType.Jump, NavAreaType.WhiteDoor);
             default: throw new System.NotFiniteNumberException();
         }
     }

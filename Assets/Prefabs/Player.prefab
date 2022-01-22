@@ -175,6 +175,8 @@ MonoBehaviour:
   characterController: {fileID: 4241401223835258354}
   speed: 2
   meshRenderer: {fileID: 4241401222439213817}
+  blackMaterial: {fileID: 2100000, guid: 4920a741dceb2134cbff56dd9beee036, type: 2}
+  whiteMaterial: {fileID: 2100000, guid: 75f78f9f453c9e8449d4f4984b4f429c, type: 2}
 --- !u!114 &1364241500
 MonoBehaviour:
   m_ObjectHideFlags: 0
