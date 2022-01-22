@@ -170,9 +170,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67d9a02de3dc0854bb1a209c95bfb2a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentColor: 0
+  currentColor:
+    value: 0
   characterController: {fileID: 4241401223835258354}
-  speed: 1
+  speed: 2
   meshRenderer: {fileID: 4241401222439213817}
 --- !u!114 &1364241500
 MonoBehaviour:

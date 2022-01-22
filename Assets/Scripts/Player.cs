@@ -6,14 +6,15 @@ using UniRx;
 
 public class Player : MonoBehaviour
 {
-    public GameColor CurrentColor => currentColor;
+    public GameColor CurrentColor => currentColor.Value;
+    public IObservable<GameColor> ObservableColor => currentColor;
 
     private static Player instance;
     public static Player Instance {
         get { return instance; }
     }
 
-    [SerializeField] private GameColor currentColor;
+    [SerializeField] private ReactiveProperty<GameColor> currentColor;
 
     [SerializeField] private CharacterController characterController;
     [SerializeField] private float speed = 1;
@@ -42,7 +43,7 @@ public class Player : MonoBehaviour
 
         characterController.Move(direction.normalized * speed * Time.deltaTime);
 
-        meshRenderer.material.color = currentColor.GetColor();
+        meshRenderer.material.color = currentColor.Value.GetColor();
 
         gameObject.layer = GetPlayerLayer();
         observablePosition.Value = transform.position;
@@ -53,14 +54,14 @@ public class Player : MonoBehaviour
         var npc = hit.gameObject.GetComponent<NPC>();
         if(npc != null)
         {
-            if (npc.Color == currentColor)
+            if (npc.Color == currentColor.Value)
             {
                 //death
             }
             else
             {
                 StartCoroutine(DelayedSetPosition(npc.transform.position));
-                currentColor = npc.Color;
+                currentColor.Value = npc.Color;
                 if(ScoreTracker.TryGetInstance(out var scoreTracker))
                 {
                     scoreTracker.Score += 1;
@@ -79,7 +80,7 @@ public class Player : MonoBehaviour
 
     private int GetPlayerLayer()
     {
-        switch(currentColor)
+        switch(currentColor.Value)
         {
             case GameColor.Black: return LayerMask.NameToLayer("Black Player");
             case GameColor.White: return LayerMask.NameToLayer("White Player");

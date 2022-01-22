@@ -20,8 +20,23 @@ public class NPC : MonoBehaviour
 
     protected void Start() {
         navMeshAgent = GetComponent<NavMeshAgent>();
-        Player.Instance.ObservablePosition.Subscribe(playerPos => {
-            navMeshAgent.destination = playerPos;
+        Player.Instance.ObservablePosition.CombineLatest(Player.Instance.ObservableColor, Tuple.Create).Subscribe(tuple => {
+            var playerPos = tuple.Item1;
+            var playerColor = tuple.Item2;
+            if (!playerColor.Equals(color)) {
+                Debug.Log(string.Format("NPC {0} run away from player {1}", color, playerColor));
+                // run away
+                var awayFromPlayer = (transform.position - playerPos).normalized * 20;
+                NavMeshHit closestHit;
+                if (NavMesh.SamplePosition(awayFromPlayer, out closestHit, 100f,
+                    navMeshAgent.areaMask)) {
+                    navMeshAgent.destination = closestHit.position;
+                }
+            } else {
+                Debug.Log(string.Format("NPC {0} chase player {1}", color, playerColor));
+                // chase player
+                navMeshAgent.destination = playerPos;
+            }
         }).AddTo(this);
     }
 
