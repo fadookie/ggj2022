@@ -22,7 +22,7 @@ public class Player : MonoBehaviour
     [SerializeField] private MeshRenderer meshRenderer;
 
     private readonly ReactiveProperty<Vector3> observablePosition = new ReactiveProperty<Vector3>();
-    public IObservable<Vector3> ObservablePosition => observablePosition;
+    public ReadOnlyReactiveProperty<Vector3> ObservablePosition => observablePosition.ToReadOnlyReactiveProperty();
 
     void Awake() {
         instance = this;
