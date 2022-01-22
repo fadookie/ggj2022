@@ -23,6 +23,7 @@ public class Wall : MonoBehaviour
         {
             meshRenderer.material = GetMaterial();
         }
+        gameObject.layer = GetWallLayer();
     }
 
     private Material GetMaterial()
@@ -32,6 +33,16 @@ public class Wall : MonoBehaviour
             case GameColor.Black: return blackMaterial;
             case GameColor.White: return whiteMaterial;
             default: throw new System.NotImplementedException();
+        }
+    }
+
+    private int GetWallLayer()
+    {
+        switch (color)
+        {
+            case GameColor.Black: return LayerMask.NameToLayer("Black Wall");
+            case GameColor.White: return LayerMask.NameToLayer("White Wall");
+            default: throw new System.NotFiniteNumberException();
         }
     }
 }

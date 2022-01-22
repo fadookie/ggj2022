@@ -28,6 +28,8 @@ public class Player : MonoBehaviour
         characterController.Move(direction.normalized * speed * Time.deltaTime);
 
         meshRenderer.material.color = currentColor.GetColor();
+
+        gameObject.layer = GetPlayerLayer();
     }
 
     protected void OnControllerColliderHit(ControllerColliderHit hit)
@@ -41,9 +43,31 @@ public class Player : MonoBehaviour
             }
             else
             {
-                npc.Die();
+                StartCoroutine(DelayedSetPosition(npc.transform.position));
                 currentColor = npc.Color;
+                if(ScoreTracker.TryGetInstance(out var scoreTracker))
+                {
+                    scoreTracker.Score += 1;
+                }
+                npc.Die();
             }
+        }
+    }
+
+    IEnumerator DelayedSetPosition(Vector3 position)
+    {
+        transform.position = position;
+        yield return null;
+        transform.position = position;
+    }
+
+    private int GetPlayerLayer()
+    {
+        switch(currentColor)
+        {
+            case GameColor.Black: return LayerMask.NameToLayer("Black Player");
+            case GameColor.White: return LayerMask.NameToLayer("White Player");
+            default: throw new System.NotFiniteNumberException();
         }
     }
 }
