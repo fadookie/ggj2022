@@ -12,6 +12,11 @@ public class Wall : MonoBehaviour
     [SerializeField] private Material whiteMaterial;
     [SerializeField] private MeshRenderer meshRenderer;
 
+    public void Setup(GameColor gameColor)
+    {
+        color = gameColor;
+    }
+
     protected void Start()
     {
         

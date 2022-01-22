@@ -22,6 +22,11 @@ public class NPC : MonoBehaviour
 
     private Coroutine wanderRoutine;
 
+    public void Setup(GameColor gameColor)
+    {
+        color = gameColor;
+    }
+
     protected void Start() {
         navMeshAgent = GetComponent<NavMeshAgent>();
     }
@@ -47,16 +52,20 @@ public class NPC : MonoBehaviour
                 StopCoroutine(wanderRoutine);
                 wanderRoutine = null;
             }
-            if (!playerColor.Equals(color)) {
+                    if (!playerColor.Equals(color))
+                    {
         //                Debug.Log(string.Format("NPC {0} run away from player {1}", color, playerColor));
                 // run away
                 var awayFromPlayer = (transform.position - playerPos).normalized * 20;
                 NavMeshHit closestHit;
                 if (NavMesh.SamplePosition(awayFromPlayer, out closestHit, 100f,
-                    navMeshAgent.areaMask)) {
+                            navMeshAgent.areaMask))
+                        {
                     SafeSetDestination(closestHit.position);
                 }
-            } else {
+                    }
+                    else
+                    {
         //                Debug.Log(string.Format("NPC {0} chase player {1}", color, playerColor));
                 // chase player
                 SafeSetDestination(playerPos);

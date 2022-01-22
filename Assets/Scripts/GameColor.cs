@@ -28,4 +28,13 @@ public static class GameColorUtil
             default: throw new System.NotImplementedException(gameColor.ToString());
         }
     }
+    public static GameColor GetRandomGameColor()
+    {
+        switch (Random.Range(0, 2))
+        {
+            case 0: return GameColor.Black;
+            case 1: return GameColor.White;
+            default: throw new System.NotImplementedException();
+        }
+    }
 }
