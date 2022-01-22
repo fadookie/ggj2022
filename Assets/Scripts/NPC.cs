@@ -1,6 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using UniRx;
 using UnityEngine;
+using UnityEngine.AI;
 
 [ExecuteAlways]
 public class NPC : MonoBehaviour
@@ -11,11 +14,15 @@ public class NPC : MonoBehaviour
     [SerializeField] private Material blackMaterial;
     [SerializeField] private Material whiteMaterial;
     [SerializeField] private MeshRenderer meshRenderer;
+    private NavMeshAgent navMeshAgent;
 
     private bool dead;
 
-    protected void Start()
-    {
+    protected void Start() {
+        navMeshAgent = GetComponent<NavMeshAgent>();
+        Player.Instance.ObservablePosition.Subscribe(playerPos => {
+            navMeshAgent.destination = playerPos;
+        }).AddTo(this);
     }
 
     protected void Update()
