@@ -31,6 +31,7 @@ public class NPC : MonoBehaviour
         {
             meshRenderer.material = GetMaterial();
         }
+        gameObject.layer = GetNPCLayer();
     }
 
     private Material GetMaterial()
@@ -40,6 +41,16 @@ public class NPC : MonoBehaviour
             case GameColor.Black: return blackMaterial;
             case GameColor.White: return whiteMaterial;
             default: throw new System.NotImplementedException();
+        }
+    }
+
+    private int GetNPCLayer()
+    {
+        switch (color)
+        {
+            case GameColor.Black: return LayerMask.NameToLayer("Black NPC");
+            case GameColor.White: return LayerMask.NameToLayer("White NPC");
+            default: throw new System.NotFiniteNumberException();
         }
     }
 
