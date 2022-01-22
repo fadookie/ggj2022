@@ -32,7 +32,7 @@ public class WorldGeneration : MonoBehaviour
 
     protected private void Start()
     {
-
+        DelayedBake();
     }
 
     protected void Update()
@@ -72,36 +72,59 @@ public class WorldGeneration : MonoBehaviour
         int wallCount = Mathf.CeilToInt((mapSize.x * mapSize.y) / wallPerXSquareUnits);
         for (int i = 0; i < wallCount; i++)
         {
-            var wall = Instantiate(wallPrefab, wallParent);
-            wall.transform.position = new Vector3((Random.value - .5f) * mapSize.x, 0, (Random.value - .5f) * mapSize.y);
+            var position = new Vector3((Random.value - .5f) * mapSize.x, 0, (Random.value - .5f) * mapSize.y);
             bool horizontal = Random.value < .5f;
-            float size = Random.Range(wallMinLength, wallMaxLength);
-            wall.transform.localScale = new Vector3(horizontal ? size : 1, 1, horizontal ? 1 : size);
-            wall.Setup(GameColorUtil.GetRandomGameColor());
+            float length = Random.Range(wallMinLength, wallMaxLength);
+            Vector3 size = new Vector3(horizontal ? length : 1, 1, horizontal ? 1 : length);
+
+            var wall = ImprovedInstantiate(wallPrefab, position, wallParent);
+            wall.Setup(GameColorUtil.GetRandomGameColor(), size);
         }
 
         int npcCount = Mathf.CeilToInt((mapSize.x * mapSize.y) / npcPerXSquareUnits);
         for (int i = 0; i < npcCount; i++)
         {
-            var npc = Instantiate(npcPrefab, npcParent);
-            npc.transform.position = new Vector3((Random.value - .5f) * mapSize.x, 0, (Random.value - .5f) * mapSize.y);
+            var position = new Vector3((Random.value - .5f) * mapSize.x, 0, (Random.value - .5f) * mapSize.y);
+
+            var npc = ImprovedInstantiate(npcPrefab, position, npcParent);
             npc.Setup(GameColorUtil.GetRandomGameColor());
         }
-        navMeshSurface.BuildNavMesh();
+        DelayedBake();
         built = true;
     }
 
-    new private static T Instantiate<T>(T prefab, Transform parent)
-        where T : MonoBehaviour
+    private void DelayedBake()
     {
-        if(Application.isPlaying)
+        if (Application.isPlaying)
         {
-            return Object.Instantiate(prefab, parent);
+            IEnumerator Routine()
+            {
+                yield return null;
+                navMeshSurface.BuildNavMesh();
+            }
+            StartCoroutine(Routine());
         }
         else
         {
 #if UNITY_EDITOR
-            return (T)UnityEditor.PrefabUtility.InstantiatePrefab(prefab, parent);
+            UnityEditor.EditorApplication.delayCall += ()=> navMeshSurface.BuildNavMesh();
+#endif
+        }
+    }
+
+    private static T ImprovedInstantiate<T>(T prefab, Vector3 position, Transform parent)
+        where T : MonoBehaviour
+    {
+        if(Application.isPlaying)
+        {
+            return Object.Instantiate(prefab, position, Quaternion.identity, parent);
+        }
+        else
+        {
+#if UNITY_EDITOR
+            var thing = (T)UnityEditor.PrefabUtility.InstantiatePrefab(prefab, parent);
+            thing.transform.position = position;
+            return thing;
 #endif
         }
     }

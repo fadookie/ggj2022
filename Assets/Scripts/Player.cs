@@ -24,12 +24,16 @@ public class Player : MonoBehaviour
     private readonly ReactiveProperty<Vector3> observablePosition = new ReactiveProperty<Vector3>();
     public ReadOnlyReactiveProperty<Vector3> ObservablePosition => observablePosition.ToReadOnlyReactiveProperty();
 
+    [SerializeField] private Material blackMaterial;
+    [SerializeField] private Material whiteMaterial;
+
     void Awake() {
         instance = this;
     }
 
     protected void Start()
     {
+
     }
 
     protected void Update()
@@ -43,7 +47,7 @@ public class Player : MonoBehaviour
 
         characterController.Move(direction.normalized * speed * Time.deltaTime);
 
-        meshRenderer.material.color = currentColor.Value.GetColor();
+        meshRenderer.material = GetPlayerMaterial();
 
         gameObject.layer = GetPlayerLayer();
         observablePosition.Value = transform.position;
@@ -78,6 +82,17 @@ public class Player : MonoBehaviour
         transform.position = position;
     }
 
+    private Material GetPlayerMaterial()
+    {
+        switch (currentColor.Value)
+        {
+            case GameColor.Black: return blackMaterial;
+            case GameColor.White: return whiteMaterial;
+            default:
+                throw new System.NotFiniteNumberException();
+        }
+    }
+    
     private int GetPlayerLayer()
     {
         switch(currentColor.Value)

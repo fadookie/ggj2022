@@ -76,6 +76,7 @@ MonoBehaviour:
   blackMaterial: {fileID: 2100000, guid: 4920a741dceb2134cbff56dd9beee036, type: 2}
   whiteMaterial: {fileID: 2100000, guid: 75f78f9f453c9e8449d4f4984b4f429c, type: 2}
   meshRenderer: {fileID: 6264191316074630226}
+  playerNoticeDistance: 10
 --- !u!114 &7388089472036280953
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -98,7 +99,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 1
+  m_Speed: 2
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120

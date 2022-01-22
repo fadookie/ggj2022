@@ -37,6 +37,7 @@ public class NPC : MonoBehaviour
             var ground = GameObject.FindGameObjectWithTag("Ground");
             groundCollider = ground.GetComponent<MeshCollider>();
         }
+        Update();
     }
 
     protected void Update()
@@ -46,6 +47,7 @@ public class NPC : MonoBehaviour
             meshRenderer.material = GetMaterial();
         }
         gameObject.layer = GetNPCLayer();
+        navMeshAgent.areaMask = GetNPCAreaMask();
 
         if (Application.isPlaying) {
             var playerPos = Player.Instance.ObservablePosition.Value;
@@ -142,6 +144,17 @@ public class NPC : MonoBehaviour
         {
             case GameColor.Black: return LayerMask.NameToLayer("Black NPC");
             case GameColor.White: return LayerMask.NameToLayer("White NPC");
+            default: throw new System.NotFiniteNumberException();
+        }
+    }
+
+
+    private int GetNPCAreaMask()
+    {
+        switch (color)
+        {
+            case GameColor.Black: return NavAreaTypeUtil.CreateMask(NavAreaType.Walkable, NavAreaType.Jump, NavAreaType.BlackDoor);
+            case GameColor.White: return NavAreaTypeUtil.CreateMask(NavAreaType.Walkable, NavAreaType.Jump, NavAreaType.WhiteDoor);
             default: throw new System.NotFiniteNumberException();
         }
     }
