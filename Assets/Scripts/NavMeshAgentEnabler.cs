@@ -11,7 +11,7 @@ public class NavMeshAgentEnabler : MonoBehaviour
         if (UnityEngine.AI.NavMesh.SamplePosition(transform.position, out closestHit, 100f,
             UnityEngine.AI.NavMesh.AllAreas)) {
             transform.position = closestHit.position;
-//            agent.enabled = true;
+            agent.enabled = true;
             Debug.Log("Fixed NavMesh position");
         } else {
             Debug.LogWarning("Critical failure to fix NavMesh position");
