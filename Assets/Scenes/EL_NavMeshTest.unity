@@ -251,6 +251,10 @@ PrefabInstance:
       propertyPath: color
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 893219991063181493, guid: a4fb7a07f893ba0449630518df82e277, type: 3}
+      propertyPath: playerNoticeDistance
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 6264191316074630226, guid: a4fb7a07f893ba0449630518df82e277, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
@@ -466,6 +470,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 893219991063181493, guid: a4fb7a07f893ba0449630518df82e277, type: 3}
+      propertyPath: playerNoticeDistance
+      value: 10
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a4fb7a07f893ba0449630518df82e277, type: 3}
 --- !u!1 &780259689
@@ -483,7 +491,7 @@ GameObject:
   - component: {fileID: 780259690}
   m_Layer: 0
   m_Name: Ground
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
@@ -740,7 +748,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 14
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
