@@ -1,8 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
+using Object = UnityEngine.Object;
+using Random = UnityEngine.Random;
 
 [ExecuteAlways]
 public class WorldGeneration : MonoBehaviour
@@ -34,29 +37,45 @@ public class WorldGeneration : MonoBehaviour
 
     [SerializeField] bool built;
 
+    IEnumerator building;
+
     protected private void Start()
     {
-        DelayedBake();
+        if (built)
+        {
+            DelayedBake();
+        }
+        else Update();
     }
 
     protected void Update()
     {
-        if (rebuild || (Application.isPlaying && !built))
+        if (rebuild || (Application.isPlaying && building == null && !built))
         {
             rebuild = false;
 
-            Buid();
+            building = Buid();
         }
+
         if(clear)
         {
             clear = false;
 
             Clear();
         }
+        if (building != null)
+        {
+            building.MoveNext();
+        }
     }
 
-    private void Clear()
+    private void Clear(bool cancelBuild = true)
     {
+        if(cancelBuild)
+        {
+            building = null;
+        }
+
         while (wallParent.childCount > 0)
         {
             DestroyImmediate(wallParent.GetChild(0).gameObject);
@@ -69,17 +88,17 @@ public class WorldGeneration : MonoBehaviour
         built = false;
     }
 
-    private void Buid()
+    private IEnumerator Buid()
     {
-        Clear();
-        if(Ground.TryGetInstance(out Ground ground))
+        Clear(false);
+        if (Ground.TryGetInstance(out Ground ground))
         {
             ground.Size = mapSize;
         }
         grid = new bool[mapSize.x, mapSize.y];
         int wallCount = Mathf.CeilToInt((mapSize.x * mapSize.y) / wallPerXSquareUnits);
         RectInt mapBounds = GetMapBounds();
-        MarkFilled(new RectInt(Mathf.RoundToInt(mapSize.x/2f) - 2, Mathf.RoundToInt(mapSize.y/2f) - 2, 4, 4));
+        MarkFilled(new RectInt(Mathf.RoundToInt(mapSize.x / 2f) - 2, Mathf.RoundToInt(mapSize.y / 2f) - 2, 4, 4));
 
         Vector3 GridToWorld(Vector2 gridPosition)
         {
@@ -108,6 +127,12 @@ public class WorldGeneration : MonoBehaviour
             }
         }
 
+        yield return null;
+
+        navMeshSurface.BuildNavMesh();
+
+        yield return null;
+
         int npcCount = Mathf.CeilToInt((mapSize.x * mapSize.y) / npcPerXSquareUnits);
         GameColor lastNPCColor = GameColor.Black;//player color
         for (int i = 0; i < npcCount; i++)
@@ -129,9 +154,10 @@ public class WorldGeneration : MonoBehaviour
 
             }
         }
-        DelayedBake();
         built = true;
+        building = null;
     }
+    
 
     private void MarkFilled(RectInt gridRect)
     {
@@ -164,7 +190,7 @@ public class WorldGeneration : MonoBehaviour
         return true;
     }
 
-    private void DelayedBake()
+    private void DelayedBake(Action then = null)
     {
         if (Application.isPlaying)
         {
@@ -172,13 +198,23 @@ public class WorldGeneration : MonoBehaviour
             {
                 yield return null;
                 navMeshSurface.BuildNavMesh();
+                yield return null;
+                then?.Invoke();
             }
             StartCoroutine(Routine());
         }
         else
         {
 #if UNITY_EDITOR
-            UnityEditor.EditorApplication.delayCall += ()=> navMeshSurface.BuildNavMesh();
+
+            UnityEditor.EditorApplication.delayCall += () =>
+            {
+                navMeshSurface.BuildNavMesh();
+                UnityEditor.EditorApplication.delayCall += () =>
+                {
+                    then?.Invoke();
+                };
+            };
 #endif
         }
     }

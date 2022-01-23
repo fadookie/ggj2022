@@ -86,10 +86,13 @@ public class NPC : MonoBehaviour
 
             var playerColor = Player.Instance.CurrentColor;
             var distanceToPlayer = Vector3.Distance(playerPos, transform.position);
-            if (distanceToPlayer > playerIgnoreDistance) {
+            bool notice = distanceToPlayer < playerNoticeDistance;
+            bool ignore = distanceToPlayer > playerIgnoreDistance;
+
+            if (ignore || !(notice || noticedPlayer) ) {
                 // Wander around
                 characterSprite.angry = false;
-                if (noticedPlayer || AtEndOfPath())
+                if (noticedPlayer || AtEndOfPath() || !navMeshAgent.hasPath)
                 {
                     noticedPlayer = false;
                     var bounds = groundCollider.bounds;
@@ -100,7 +103,7 @@ public class NPC : MonoBehaviour
                     SafeSetDestination(newTarget);
                 }
             }
-            else if(distanceToPlayer < playerNoticeDistance || noticedPlayer) {
+            else if(notice || noticedPlayer) {
                 noticedPlayer = true;
                 if (playerColor != Color) {
                     // run away
@@ -156,7 +159,11 @@ public class NPC : MonoBehaviour
             if (!navMeshAgent.SetDestination(pos)) {
                 Debug.LogError("Unable to set destination");
             }
-        } 
+        }
+        else
+        {
+            Debug.LogError("navMeshAgent issue");
+        }
     }
     
     bool AtEndOfPath()
