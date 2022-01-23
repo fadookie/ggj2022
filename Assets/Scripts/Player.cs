@@ -89,6 +89,7 @@ public class Player : MonoBehaviour
 
     private void Die() {
         gameObject.SetActive(false);
+        AudioManager.Instance.PlaySound(AudioManager.Sound.Death);
         Debug.LogWarning($"Player died. time:{Time.time} posStartTime:{possessionStartTime} duration:{ElapsedPossessionTime}");
     }
 
@@ -107,7 +108,9 @@ public class Player : MonoBehaviour
             Debug.LogWarning($"OnNPCCollisionEnter NPC hit current timer: {ElapsedPossessionTime} new timer:{Time.time - (possessionStartTime - damageTimerReductionSec)}");
             possessionStartTime -= damageTimerReductionSec;
             // Timer rundown will be checked next update
+            AudioManager.Instance.PlaySound(AudioManager.Sound.TakeDamage);
         } else {
+            // possess enemy
             StartCoroutine(DelayedSetPosition(npc.transform.position));
             currentColor.Value = npc.Color;
             if (ScoreTracker.TryGetInstance(out var scoreTracker)) {
@@ -115,6 +118,7 @@ public class Player : MonoBehaviour
             }
             npc.Die();
             possessionStartTime = Time.time;
+            AudioManager.Instance.PlaySound(AudioManager.Sound.Possession);
         }
     }
 
