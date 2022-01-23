@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using UniRx;
 using UnityEngine;
@@ -46,6 +47,8 @@ public class NPC : MonoBehaviour
     private float awarenessTimeOffset;
     private float awarenessVariationPeriod = 5;
 
+    public bool PendingPath => navMeshAgent.pathPending;
+
     public void Setup(GameColor gameColor)
     {
         Color = gameColor;
@@ -75,7 +78,9 @@ public class NPC : MonoBehaviour
 
     protected void Update()
     {
-        if (Application.isPlaying) {
+        if (Application.isPlaying)
+        {
+            NPCManager.Instance.UpdateIsPendingPath(this, PendingPath);
             float awarenessLerp = Mathf.Sin((awarenessTimeOffset + Time.time / awarenessVariationPeriod) * tau);
             awarenessLerp  = (awarenessLerp + 1f)/ 2f;
             var playerIgnoreDistance = Mathf.Lerp(playerIgnoreDistanceMin, playerIgnoreDistanceMax, awarenessLerp);
@@ -101,13 +106,17 @@ public class NPC : MonoBehaviour
                 characterSprite.angry = false;
                 if (noticedPlayer || AtEndOfPath() || !navMeshAgent.hasPath)
                 {
-                    noticedPlayer = false;
-                    navMeshAgent.speed = walkSpeed;
-                    var bounds = groundCollider.bounds;
-                    var newTarget = new Vector3(UnityEngine.Random.Range(bounds.min.x, bounds.max.x), 0,
-                        UnityEngine.Random.Range(bounds.min.z, bounds.max.z));
-                    //Debug.Log(string.Format("wander new target newTarget:{0} pathStatus:{1} pathPending:{2}", newTarget, navMeshAgent.pathStatus, navMeshAgent.pathPending));
-                    SafeSetDestination(newTarget);
+                    noticedPlayer = false; 
+                    navMeshAgent.ResetPath();
+                    if (NPCManager.Instance.NPCsPendingPath < 10)
+                    {
+                        navMeshAgent.speed = walkSpeed;
+                        var bounds = groundCollider.bounds;
+                        var newTarget = new Vector3(UnityEngine.Random.Range(bounds.min.x, bounds.max.x), 0,
+                            UnityEngine.Random.Range(bounds.min.z, bounds.max.z));
+                        //Debug.Log(string.Format("wander new target newTarget:{0} pathStatus:{1} pathPending:{2}", newTarget, navMeshAgent.pathStatus, navMeshAgent.pathPending));
+                        SafeSetDestination(newTarget);
+                    }
                 }
             }
             else if(notice || noticedPlayer) {
@@ -133,6 +142,7 @@ public class NPC : MonoBehaviour
                     SafeSetDestination(playerPos);
                 }
             }
+            NPCManager.Instance.UpdateIsPendingPath(this, PendingPath);
         }
     }
 
@@ -174,6 +184,7 @@ public class NPC : MonoBehaviour
     {
         lookup.Remove(gameObject);
         NPCManager.Instance.UnregisterNPC(this);
+
     }
 
     private void SafeSetDestination(Vector3 pos) {
@@ -190,7 +201,7 @@ public class NPC : MonoBehaviour
     
     bool AtEndOfPath()
     {
-        hasPath |= navMeshAgent.hasPath;
+           hasPath |= navMeshAgent.hasPath;
         if (hasPath && navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance + pathEndThreshold )
         {
             // Arrived

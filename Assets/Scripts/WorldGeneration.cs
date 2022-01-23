@@ -104,7 +104,8 @@ public class WorldGeneration : MonoBehaviour
         grid = new GridTile[mapSize.x, mapSize.y];
         int wallCount = Mathf.CeilToInt((mapSize.x * mapSize.y) / wallPerXSquareUnits);
         RectInt mapBounds = GetMapBounds();
-        MarkFilled(new RectInt(Mathf.RoundToInt(mapSize.x / 2f) - 4, Mathf.RoundToInt(mapSize.y / 2f) - 4, 8, 8));
+        RectInt wallDeadZone = new RectInt(Mathf.RoundToInt(mapSize.x / 2f) - 2, Mathf.RoundToInt(mapSize.y / 2f) - 2, 4, 4);
+        MarkFilled(wallDeadZone);
 
         Vector3 GridToWorld(Vector2 gridPosition)
         {
@@ -146,6 +147,10 @@ public class WorldGeneration : MonoBehaviour
         int npcCount = Mathf.CeilToInt((mapSize.x * mapSize.y) / npcPerXSquareUnits);
         GameColor lastNPCColor = GameColor.Black;//player color
         HashSet<Vector2Int> npcLocations = new HashSet<Vector2Int>();
+
+        RectInt npcDeadZone = new RectInt(Mathf.RoundToInt(mapSize.x / 2f) - 8, Mathf.RoundToInt(mapSize.y / 2f) - 8, 16, 16);
+
+        List<NPC> npcs = new List<NPC>();
         for (int i = 0; i < npcCount; i++)
         {
             int tries = 100;
@@ -154,19 +159,31 @@ public class WorldGeneration : MonoBehaviour
                 var position = new Vector2Int(Random.Range(0, mapBounds.width), Random.Range(0, mapBounds.height));
                 var rect = new RectInt(position, Vector2Int.one);
                 var color = lastNPCColor.GetOpposite();
-                if (!npcLocations.Contains(position) && IsOpen(rect, color))
+                if (!npcLocations.Contains(position) && IsOpen(rect, color) && !npcDeadZone.Contains(position))
                 {
                     MarkFilled(rect, color);
                     npcLocations.Add(position);
                     var npc = ImprovedInstantiate(npcPrefab, GridToWorld(rect.center), npcParent);
-                    
+                    npc.gameObject.SetActive(false);
+                    npcs.Add(npc);
                     lastNPCColor = color;
                     npc.Setup(color);
+
                     break;
                 }
             }
         }
         built = true;
+        npcs.Sort((a, b) => a.transform.position.sqrMagnitude.CompareTo(b.transform.position.sqrMagnitude));
+        foreach (var npc in npcs)
+        {
+            npc.gameObject.SetActive(true);
+            yield return null;
+            while(npc.PendingPath)
+            {
+                yield return null;
+            }
+        }
         building = null;
     }
     private void MarkFilled(Vector2Int gridPosition, GameColor? gameColor = null)
