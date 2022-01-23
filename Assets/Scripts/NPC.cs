@@ -33,6 +33,9 @@ public class NPC : MonoBehaviour
     [SerializeField] private float pathEndThreshold = 0.1f;
     private bool hasPath = false;
 
+    [SerializeField] private float walkSpeed = 1.5f;
+    [SerializeField] private float runSpeed = 2.75f;
+
     private Collider groundCollider;
     [SerializeField] private CharacterSprite characterSprite;
 
@@ -46,6 +49,7 @@ public class NPC : MonoBehaviour
         Color = gameColor;
         color.Subscribe(OnColorChange);
         characterSprite.color = gameColor;
+        NPCManager.Instance.RegisterNPC(this);
     }
 
     protected void Start() {
@@ -60,7 +64,6 @@ public class NPC : MonoBehaviour
     {
         lookup.Add(gameObject, this);
         awarenessTimeOffset = Random.value;
-        NPCManager.Instance.RegisterNPC(this);
     }
 
     private const float tau = Mathf.PI * 2;
@@ -95,16 +98,17 @@ public class NPC : MonoBehaviour
                 if (noticedPlayer || AtEndOfPath() || !navMeshAgent.hasPath)
                 {
                     noticedPlayer = false;
+                    navMeshAgent.speed = walkSpeed;
                     var bounds = groundCollider.bounds;
                     var newTarget = new Vector3(UnityEngine.Random.Range(bounds.min.x, bounds.max.x), 0,
                         UnityEngine.Random.Range(bounds.min.z, bounds.max.z));
-                    Debug.Log(string.Format("wander new target newTarget:{0} pathStatus:{1} pathPending:{2}", newTarget,
-                        navMeshAgent.pathStatus, navMeshAgent.pathPending));
+                    //Debug.Log(string.Format("wander new target newTarget:{0} pathStatus:{1} pathPending:{2}", newTarget, navMeshAgent.pathStatus, navMeshAgent.pathPending));
                     SafeSetDestination(newTarget);
                 }
             }
             else if(notice || noticedPlayer) {
                 noticedPlayer = true;
+                navMeshAgent.speed = runSpeed;
                 if (playerColor != Color) {
                     // run away
                     characterSprite.angry = false;

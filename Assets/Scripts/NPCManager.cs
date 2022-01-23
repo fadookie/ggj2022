@@ -5,8 +5,8 @@ using System.Linq;
 
 public class NPCManager
 {
-    public IReadOnlyList<NPC> BlackNpcs => blackNpcs.ToList();
-    public IReadOnlyList<NPC> WhiteNpcs => whiteNpcs.ToList();
+    public IReadOnlyCollection<NPC> BlackNpcs => blackNpcs;
+    public IReadOnlyCollection<NPC> WhiteNpcs => whiteNpcs;
 
     private readonly HashSet<NPC> blackNpcs = new HashSet<NPC>();
     private readonly HashSet<NPC> whiteNpcs = new HashSet<NPC>();
@@ -14,18 +14,20 @@ public class NPCManager
     private static readonly Lazy<NPCManager> instance = new Lazy<NPCManager>(() => new NPCManager());
     public static NPCManager Instance => instance.Value;
 
-    public IReadOnlyList<NPC> GetNPCsByColor(GameColor color) {
+    public IReadOnlyCollection<NPC> GetNPCsByColor(GameColor color)
+    {
         switch (color) {
-                case GameColor.Black:
-                    return BlackNpcs;
-                case GameColor.White:
-                    return WhiteNpcs;
-                default:
-                    throw new InvalidOperationException("Unexpected GameColor");
+            case GameColor.Black:
+                return BlackNpcs;
+            case GameColor.White:
+                return WhiteNpcs;
+            default:
+                throw new InvalidOperationException("Unexpected GameColor");
         }
     }
 
-    public void RegisterNPC(NPC npc) {
+    public void RegisterNPC(NPC npc)
+    {
         switch (npc.Color) {
                 case GameColor.Black:
                     blackNpcs.Add(npc);

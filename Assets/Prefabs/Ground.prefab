@@ -66,6 +66,8 @@ GameObject:
   - component: {fileID: 1903749379406044427}
   - component: {fileID: 1903749379406044424}
   - component: {fileID: 1903749379406044425}
+  - component: {fileID: 1599742925}
+  - component: {fileID: 1599742926}
   m_Layer: 0
   m_Name: Ground
   m_TagString: Ground
@@ -119,7 +121,7 @@ MonoBehaviour:
   m_OverrideVoxelSize: 0
   m_VoxelSize: 0.16666667
   m_BuildHeightMesh: 0
-  m_NavMeshData: {fileID: 23800000, guid: 0ae4439d51c0c422f9cdbb821ba353c1, type: 2}
+  m_NavMeshData: {fileID: 0}
 --- !u!33 &1903749379406044427
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -183,6 +185,43 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1599742925
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1903749379406044422}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e8b4495664b29443a6fe2b8016936f3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rebuild: 0
+  clear: 0
+  navMeshSurface: {fileID: 1903749379406044426}
+  wallParent: {fileID: 0}
+  wallPrefab: {fileID: 5555394541824035417, guid: 4b8f51a0be41ea5488bc170065b738ec, type: 3}
+  wallPerXSquareUnits: 20
+  wallMinLength: 3
+  wallMaxLength: 10
+  npcParent: {fileID: 0}
+  npcPrefab: {fileID: 893219991063181493, guid: a4fb7a07f893ba0449630518df82e277, type: 3}
+  npcPerXSquareUnits: 100
+  mapSize: {x: 100, y: 100}
+  built: 0
+--- !u!114 &1599742926
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1903749379406044422}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2671545554d6cf47ae4e95c76705744, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3169747936589188268
 GameObject:
   m_ObjectHideFlags: 0

@@ -10,19 +10,21 @@ public class CameraController : MonoBehaviour
 
     private Vector3 velocity;
 
+    private Vector2 screenSizeInUnits;
 
     [SerializeField] private float smoothTime = 1;
 
-    private void Start()
+
+    private static CameraController instance;
+
+    protected void Start()
     {
+        instance = this;
         offset = transform.localPosition;
     }
 
     protected void LateUpdate()
     {
-
-        Vector2 screenSizeInUnits = new Vector2(2 * Camera.main.orthographicSize * Screen.width / Screen.height, 2 * Camera.main.orthographicSize);
-
         if (player != null)
         {
             Vector3 target = player.transform.position + offset;
@@ -34,5 +36,16 @@ public class CameraController : MonoBehaviour
             }
             transform.position = Vector3.SmoothDamp(transform.position, target, ref velocity, smoothTime);
         }
+    }
+    public Bounds GetScreenInWorldSpace()
+    {
+        Vector2 screenSizeInUnits = new Vector2(2 * Camera.main.orthographicSize * Screen.width / Screen.height, 2 * Camera.main.orthographicSize);
+        return new Bounds(transform.position, new Vector3(screenSizeInUnits.x, 9999, screenSizeInUnits.y));
+    }
+
+    public static bool TryGetInstance(out CameraController cameraController)
+    {
+        cameraController = instance;
+        return cameraController != null;
     }
 }

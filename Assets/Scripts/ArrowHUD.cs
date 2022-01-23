@@ -6,49 +6,87 @@ using UnityEngine;
 
 public class ArrowHUD : MonoBehaviour
 {
-    [SerializeField] private GameObject[] arrows;
+    [SerializeField] private Indicator arrowTemplate;
+    private List<Indicator> arrows = new List<Indicator>();
     [SerializeField] private float minDistanceFromPlayerForArrow;
     [SerializeField] private float arrowBoxPadding;
     
     // Start is called before the first frame update
     void Start()
     {
+        arrowTemplate.gameObject.SetActive(false);
     }
 
     // Update is called once per frame
-    void Update() {
-        var player = Player.Instance;
-        var preyNpcs = NPCManager.Instance.GetNPCsByColor(
-            player.CurrentColor.GetOpposite()
-        );
-        var closestPrey = preyNpcs
-            .Select(npc => Tuple.Create(npc, Vector3.Distance(player.transform.position, npc.transform.position)))
-            .OrderBy(tuple => tuple.Item2)
-            .Where(tuple => tuple.Item2 > minDistanceFromPlayerForArrow)
-            .Take(Math.Min(arrows.Length, preyNpcs.Count))
-            .ToList();
+    void Update()
+    {
+        var maxArrows = 0;
 
-        var maxArrows = Math.Min(arrows.Length, closestPrey.Count);
-        for (var i = 0; i < maxArrows; ++i) {
-            var arrow = arrows[i];
-            var npc = closestPrey[i].Item1;
-            var distanceToPlayer = closestPrey[i].Item2;
-            var npcScreenPos = Camera.main.WorldToScreenPoint(npc.transform.position);
-            var clampedScreenPos = new Vector3(
-                Mathf.Clamp(npcScreenPos.x, arrowBoxPadding, Screen.width - arrowBoxPadding),
-                Mathf.Clamp(npcScreenPos.y, arrowBoxPadding, Screen.height - arrowBoxPadding),
-                0
+        if (CameraController.TryGetInstance(out var cameraController))
+        {
+            var player = Player.Instance;
+            var preyNpcs = NPCManager.Instance.GetNPCsByColor(
+                player.CurrentColor.GetOpposite()
             );
-            var clampedWorldPos = Camera.main.ScreenToWorldPoint(clampedScreenPos);
-            clampedWorldPos.y = arrow.transform.position.y;
-            arrow.transform.position = clampedWorldPos;
-            arrow.transform.LookAt(npc.transform);
-            var rotation = arrow.transform.rotation;
-            var euler = rotation.eulerAngles;
-            euler.x = 90;
-            euler.z = 0;
-            rotation.eulerAngles = euler;
-            arrow.transform.rotation = rotation;
+
+            Bounds screenBounds = cameraController.GetScreenInWorldSpace();
+            Bounds screenBoundsPlus = screenBounds;
+            screenBoundsPlus.size += Vector3.one * .5f;
+            var closestPrey = preyNpcs
+                .Where(npc => !screenBoundsPlus.Contains(npc.transform.position))
+                .Select(npc => (npc: npc, closestPoint : screenBoundsPlus.ClosestPoint(npc.transform.position)))
+                .Select(tuple => (npc:tuple.npc, closestPoint: screenBounds.ClosestPoint(tuple.closestPoint), distance : Vector3.Distance(tuple.closestPoint, tuple.npc.transform.position)))
+                .OrderBy(tuple => tuple.distance)
+                .Take(10)
+                .ToList();
+
+            maxArrows = closestPrey.Count;
+            for (var i = 0; i < maxArrows; ++i)
+            {
+                while(i>= arrows.Count)
+                {
+                    arrows.Add(Instantiate(arrowTemplate, arrowTemplate.transform.parent));
+                }
+
+                var arrow = arrows[i];
+                arrow.gameObject.SetActive(true);
+                var npc = closestPrey[i].npc;
+                var distance = closestPrey[i].distance;
+                var closestPoint = closestPrey[i].closestPoint;
+                arrow.Setup(npc.Color, Mathf.Clamp01(4 / (distance + 4) * .8f + .2f), closestPoint);
+            }
         }
+        for (var i = maxArrows; i < arrows.Count; ++i)
+        {
+            arrows[i].gameObject.SetActive(false);
+        }
+    }
+
+    private static Vector3 SmoothIfInCorner(Vector3 point, Bounds bounds, float radius)
+    {
+        bounds.size -= Vector3.one * radius;
+        var min = bounds.min;
+        var max = bounds.max;
+        bool BeyondLimit(float value, float min, float max, out float limit)
+        {
+            if (value > max)
+            {
+                limit = max;
+                return true;
+            }
+            else if (value < min)
+            {
+                limit = min;
+                return true;
+            }
+            limit = 0;
+            return false;
+        }
+        if(BeyondLimit(point.x, min.x, max.x, out float x) && BeyondLimit(point.z, min.z, max.z, out float z))
+        {
+            var corner = new Vector3(x, point.y, z);
+            return ((point - corner)).normalized * radius + corner;
+        }
+        return point;
     }
 }

@@ -83,6 +83,8 @@ MonoBehaviour:
   playerIgnoreDistanceMax: 8
   navMeshAgent: {fileID: 408571369}
   pathEndThreshold: 0.1
+  walkSpeed: 1.5
+  runSpeed: 2.75
   characterSprite: {fileID: 4368142594350941705}
 --- !u!114 &4368142594350941705
 MonoBehaviour:
@@ -118,7 +120,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.4
-  m_Speed: 2
+  m_Speed: 2.75
   m_Acceleration: 800000
   avoidancePriority: 50
   m_AngularSpeed: 120000
@@ -129,7 +131,7 @@ NavMeshAgent:
   m_Height: 2
   m_BaseOffset: 0
   m_WalkableMask: 13
-  m_ObstacleAvoidanceType: 4
+  m_ObstacleAvoidanceType: 1
 --- !u!114 &408571375
 MonoBehaviour:
   m_ObjectHideFlags: 0
