@@ -50,6 +50,7 @@ public class NPC : MonoBehaviour
     protected void OnEnable()
     {
         lookup.Add(gameObject, this);
+        NPCManager.Instance.RegisterNPC(this);
     }
 
     protected void Update()
@@ -111,6 +112,7 @@ public class NPC : MonoBehaviour
     protected void OnDisable()
     {
         lookup.Remove(gameObject);
+        NPCManager.Instance.UnregisterNPC(this);
     }
 
     private void SafeSetDestination(Vector3 pos) {
