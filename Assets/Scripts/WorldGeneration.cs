@@ -65,14 +65,17 @@ public class WorldGeneration : MonoBehaviour
         {
             DestroyImmediate(npcParent.GetChild(0).gameObject);
         }
-
+        navMeshSurface.RemoveData();
         built = false;
     }
 
     private void Buid()
     {
         Clear();
-
+        if(Ground.TryGetInstance(out Ground ground))
+        {
+            ground.Size = mapSize;
+        }
         grid = new bool[mapSize.x, mapSize.y];
         int wallCount = Mathf.CeilToInt((mapSize.x * mapSize.y) / wallPerXSquareUnits);
         RectInt mapBounds = GetMapBounds();
@@ -106,6 +109,7 @@ public class WorldGeneration : MonoBehaviour
         }
 
         int npcCount = Mathf.CeilToInt((mapSize.x * mapSize.y) / npcPerXSquareUnits);
+        GameColor lastNPCColor = GameColor.Black;//player color
         for (int i = 0; i < npcCount; i++)
         {
             int tries = 100;
@@ -117,7 +121,9 @@ public class WorldGeneration : MonoBehaviour
                 {
                     MarkFilled(rect);
                     var npc = ImprovedInstantiate(npcPrefab, GridToWorld(rect.center), npcParent);
-                    npc.Setup(GameColorUtil.GetRandomGameColor());
+                    var color = lastNPCColor.GetOpposite();
+                    lastNPCColor = color;
+                    npc.Setup(color);
                     break;
                 }
 

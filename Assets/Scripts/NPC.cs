@@ -5,6 +5,7 @@ using System.Runtime.InteropServices.ComTypes;
 using UniRx;
 using UnityEngine;
 using UnityEngine.AI;
+using Random = UnityEngine.Random;
 
 [ExecuteAlways]
 [RequireComponent(typeof(CharacterSprite))]
@@ -23,7 +24,10 @@ public class NPC : MonoBehaviour
     [SerializeField] private Material blackMaterial;
     [SerializeField] private Material whiteMaterial;
     [SerializeField] private MeshRenderer meshRenderer;
-    [SerializeField] private float playerNoticeDistance = 10f;
+    [SerializeField] private float playerNoticeDistanceMin = 5f;
+    [SerializeField] private float playerNoticeDistanceMax = 10f;
+    [SerializeField] private float playerIgnoreDistanceMin = 10f;
+    [SerializeField] private float playerIgnoreDistanceMax = 15f;
 
     [SerializeField] private NavMeshAgent navMeshAgent;
     [SerializeField] private float pathEndThreshold = 0.1f;
@@ -31,6 +35,11 @@ public class NPC : MonoBehaviour
 
     private Collider groundCollider;
     [SerializeField] private CharacterSprite characterSprite;
+
+    private bool noticedPlayer;
+
+    private float awarenessTimeOffset;
+    private float awarenessVariationPeriod = 5;
 
     public void Setup(GameColor gameColor)
     {
@@ -50,19 +59,39 @@ public class NPC : MonoBehaviour
     protected void OnEnable()
     {
         lookup.Add(gameObject, this);
+        awarenessTimeOffset = Random.value;
         NPCManager.Instance.RegisterNPC(this);
     }
+
+    private const float tau = Mathf.PI * 2;
+
+    private float lastUpdatedFleeTargetFlee = -999;
 
     protected void Update()
     {
         if (Application.isPlaying) {
+            float awarenessLerp = Mathf.Sin((awarenessTimeOffset + Time.time / awarenessVariationPeriod) * tau);
+            awarenessLerp  = (awarenessLerp + 1f)/ 2f;
+            var playerIgnoreDistance = Mathf.Lerp(playerIgnoreDistanceMin, playerIgnoreDistanceMax, awarenessLerp);
+            var playerNoticeDistance = Mathf.Lerp(playerNoticeDistanceMin, playerNoticeDistanceMax, awarenessLerp);
             var playerPos = Player.Instance.transform.position;
+
+            { // debug
+                Vector3 vectorTowardPlayer = (playerPos - transform.position).normalized;
+                var noticePoint = transform.position + vectorTowardPlayer * playerNoticeDistance;
+                var ignorePoint = noticePoint + vectorTowardPlayer * playerIgnoreDistance;
+                Debug.DrawLine(transform.position, noticePoint, UnityEngine.Color.red);
+                Debug.DrawLine(noticePoint, ignorePoint, UnityEngine.Color.yellow);
+            }
+
             var playerColor = Player.Instance.CurrentColor;
             var distanceToPlayer = Vector3.Distance(playerPos, transform.position);
-            if (distanceToPlayer > playerNoticeDistance) {
+            if (distanceToPlayer > playerIgnoreDistance) {
                 // Wander around
                 characterSprite.angry = false;
-                if (AtEndOfPath()) {
+                if (noticedPlayer || AtEndOfPath())
+                {
+                    noticedPlayer = false;
                     var bounds = groundCollider.bounds;
                     var newTarget = new Vector3(UnityEngine.Random.Range(bounds.min.x, bounds.max.x), 0,
                         UnityEngine.Random.Range(bounds.min.z, bounds.max.z));
@@ -70,15 +99,22 @@ public class NPC : MonoBehaviour
                         navMeshAgent.pathStatus, navMeshAgent.pathPending));
                     SafeSetDestination(newTarget);
                 }
-            } else {
+            }
+            else if(distanceToPlayer < playerNoticeDistance || noticedPlayer) {
+                noticedPlayer = true;
                 if (playerColor != Color) {
                     // run away
                     characterSprite.angry = false;
-                    var awayFromPlayer = (transform.position - playerPos).normalized * 20;
-                    NavMeshHit closestHit;
-                    if (NavMesh.SamplePosition(awayFromPlayer, out closestHit, 100f,
-                        navMeshAgent.areaMask)) {
-                        SafeSetDestination(closestHit.position);
+                    if (lastUpdatedFleeTargetFlee < Time.time - 1f)
+                    {
+                        lastUpdatedFleeTargetFlee = Time.time;
+                        var awayFromPlayer = (transform.position - playerPos).normalized * 20;
+                        NavMeshHit closestHit;
+                        if (NavMesh.SamplePosition(awayFromPlayer, out closestHit, 100f,
+                            navMeshAgent.areaMask))
+                        {
+                            SafeSetDestination(closestHit.position);
+                        }
                     }
                 } else {
                     // chase player
