@@ -7,6 +7,8 @@ using UnityEngine.AI;
 [ExecuteAlways]
 public class WorldGeneration : MonoBehaviour
 {
+    private bool[,] grid;
+
 
     [SerializeField] bool rebuild;
     [SerializeField] bool clear;
@@ -17,8 +19,8 @@ public class WorldGeneration : MonoBehaviour
     [SerializeField] Transform wallParent;
     [SerializeField] private Wall wallPrefab;
     [SerializeField] private int wallPerXSquareUnits = 200;
-    [SerializeField] private float wallMinLength;
-    [SerializeField] private float wallMaxLength;
+    [SerializeField] private int wallMinLength;
+    [SerializeField] private int wallMaxLength;
 
 
 
@@ -26,7 +28,9 @@ public class WorldGeneration : MonoBehaviour
     [SerializeField] private NPC npcPrefab;
     [SerializeField] private int npcPerXSquareUnits = 200;
 
-    [SerializeField] Vector2 mapSize = new Vector2(100, 100);
+    [SerializeField] private Vector2Int mapSize = new Vector2Int(100, 100);
+
+    private RectInt GetMapBounds() => new RectInt(Mathf.CeilToInt(-mapSize.x / 2f), Mathf.CeilToInt(-mapSize.y / 2f), mapSize.x, mapSize.y);
 
     [SerializeField] bool built;
 
@@ -69,28 +73,89 @@ public class WorldGeneration : MonoBehaviour
     {
         Clear();
 
+        grid = new bool[mapSize.x, mapSize.y];
         int wallCount = Mathf.CeilToInt((mapSize.x * mapSize.y) / wallPerXSquareUnits);
+        RectInt mapBounds = GetMapBounds();
+        MarkFilled(new RectInt(Mathf.RoundToInt(mapSize.x/2f) - 2, Mathf.RoundToInt(mapSize.y/2f) - 2, 4, 4));
+
+        Vector3 GridToWorld(Vector2 gridPosition)
+        {
+            return new Vector3(gridPosition.x + mapBounds.xMin, 0, gridPosition.y + mapBounds.yMin);
+        }
         for (int i = 0; i < wallCount; i++)
         {
-            var position = new Vector3((Random.value - .5f) * mapSize.x, 0, (Random.value - .5f) * mapSize.y);
-            bool horizontal = Random.value < .5f;
-            float length = Random.Range(wallMinLength, wallMaxLength);
-            Vector3 size = new Vector3(horizontal ? length : 1, 1, horizontal ? 1 : length);
+            GameColor gameColor = GameColorUtil.GetRandomGameColor();
 
-            var wall = ImprovedInstantiate(wallPrefab, position, wallParent);
-            wall.Setup(GameColorUtil.GetRandomGameColor(), size);
+            int tries = 100;
+            while (--tries > 0)
+            {
+                bool horizontal = Random.value < .5f;
+                int length = Random.Range(wallMinLength, wallMaxLength);
+                Vector2Int size = new Vector2Int(horizontal ? length : 1, horizontal ? 1 : length);
+                Vector2Int gridPosition = new Vector2Int(Mathf.FloorToInt(Random.Range(0, mapBounds.width + 1 - size.x) / 2f) * 2, Mathf.FloorToInt(Random.Range(0, mapBounds.height + 1 - size.y) / 2f) * 2);
+                RectInt gridBounds = new RectInt(gridPosition, size);
+
+                if (IsOpen(gridBounds))
+                {
+                    MarkFilled(gridBounds);
+                    var wall = ImprovedInstantiate(wallPrefab, GridToWorld(gridBounds.center), wallParent);
+                    wall.Setup(gameColor, new Vector3(gridBounds.size.x, 1, gridBounds.size.y));
+                    break;
+                }
+            }
         }
 
         int npcCount = Mathf.CeilToInt((mapSize.x * mapSize.y) / npcPerXSquareUnits);
         for (int i = 0; i < npcCount; i++)
         {
-            var position = new Vector3((Random.value - .5f) * mapSize.x, 0, (Random.value - .5f) * mapSize.y);
+            int tries = 100;
+            while (--tries > 0)
+            {
+                var position = new Vector2Int(Random.Range(0, mapBounds.width), Random.Range(0, mapBounds.height));
+                var rect = new RectInt(position, Vector2Int.one);
+                if (IsOpen(rect))
+                {
+                    MarkFilled(rect);
+                    var npc = ImprovedInstantiate(npcPrefab, GridToWorld(rect.center), npcParent);
+                    npc.Setup(GameColorUtil.GetRandomGameColor());
+                    break;
+                }
 
-            var npc = ImprovedInstantiate(npcPrefab, position, npcParent);
-            npc.Setup(GameColorUtil.GetRandomGameColor());
+            }
         }
         DelayedBake();
         built = true;
+    }
+
+    private void MarkFilled(RectInt gridRect)
+    {
+        for (int x = gridRect.xMin; x < gridRect.xMax; x++)
+        {
+            for (int y = gridRect.yMin; y < gridRect.yMax; y++)
+            {
+                grid[x, y] = true;
+            }
+        }
+    }
+
+    private bool IsOpen(Vector2Int gridPosition)
+    {
+        return !grid[gridPosition.x, gridPosition.y];
+    }
+
+    private bool IsOpen(RectInt gridRect)
+    {
+        for (int x = gridRect.xMin; x < gridRect.xMax; x++)
+        {
+            for (int y = gridRect.yMin; y < gridRect.yMax; y++)
+            {
+                if (grid[x, y])
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private void DelayedBake()

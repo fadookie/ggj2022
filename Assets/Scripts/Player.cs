@@ -22,9 +22,6 @@ public class Player : MonoBehaviour
 
     [SerializeField] private MeshRenderer meshRenderer;
 
-    private readonly ReactiveProperty<Vector3> observablePosition = new ReactiveProperty<Vector3>();
-    public ReadOnlyReactiveProperty<Vector3> ObservablePosition => observablePosition.ToReadOnlyReactiveProperty();
-
     [SerializeField] private Material blackMaterial;
     [SerializeField] private Material whiteMaterial;
     
@@ -38,6 +35,7 @@ public class Player : MonoBehaviour
     {
         characterSprite = GetComponent<CharacterSprite>();
         characterSprite.posessed = true;
+        currentColor.Subscribe(OnColorChange);
     }
 
     protected void Update()
@@ -50,18 +48,19 @@ public class Player : MonoBehaviour
         if (Input.GetKey(KeyCode.S)) direction.z -= 1;
 
         characterController.Move(direction.normalized * speed * Time.deltaTime);
+    }
 
+    private void OnColorChange(GameColor color)
+    {
         meshRenderer.material = GetPlayerMaterial();
         characterSprite.color = currentColor.Value;
 
         gameObject.layer = GetPlayerLayer();
-        observablePosition.Value = transform.position;
     }
 
     protected void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        var npc = hit.gameObject.GetComponent<NPC>();
-        if(npc != null)
+        if(NPC.TryGetNPC(hit.gameObject, out NPC npc))
         {
             if (npc.Color == currentColor.Value)
             {

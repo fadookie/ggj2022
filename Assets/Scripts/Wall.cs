@@ -1,14 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
+using UniRx;
 using UnityEngine;
 using UnityEngine.AI;
 
 [ExecuteAlways]
 public class Wall : MonoBehaviour
 {
-    public GameColor Color => Color;
-    [SerializeField] private GameColor color;
+    public GameColor Color
+    {
+        get => color.Value;
+        private set => color.Value = value;
+    }
 
+    [SerializeField] private ReactiveProperty<GameColor> color;
     [SerializeField] private Material blackMaterial;
     [SerializeField] private Material whiteMaterial;
 
@@ -18,12 +23,24 @@ public class Wall : MonoBehaviour
 
     public void Setup(GameColor gameColor, Vector3 size)
     {
-        color = gameColor;
-
+        Color = gameColor;
+        color.Subscribe(OnColorChange);
         meshRenderer.transform.localScale = GetWorldScale(size);
         boxCollider.size = GetWorldScale(size);
-        navMeshModifierVolume.size = GetWorldScale(size + Vector3.one);
+        navMeshModifierVolume.size = GetWorldScale(size + new Vector3(.4f,0,.4f)*2);
         Update();
+    }
+
+    private void OnColorChange(GameColor color)
+    {
+        Color = color;
+
+        if (meshRenderer != null)
+        {
+            meshRenderer.material = GetMaterial();
+        }
+        gameObject.layer = GetWallLayer();
+        navMeshModifierVolume.area = GetNavAreaType();
     }
 
     private Vector3 GetWorldScale(Vector3 scale)
@@ -44,17 +61,11 @@ public class Wall : MonoBehaviour
 
     protected void Update()
     {
-        if (meshRenderer != null)
-        {
-            meshRenderer.material = GetMaterial();
-        }
-        gameObject.layer = GetWallLayer();
-        navMeshModifierVolume.area = GetNavAreaType();
     }
 
     private Material GetMaterial()
     {
-        switch(color)
+        switch(Color)
         {
             case GameColor.Black: return blackMaterial;
             case GameColor.White: return whiteMaterial;
@@ -64,7 +75,7 @@ public class Wall : MonoBehaviour
 
     private int GetWallLayer()
     {
-        switch (color)
+        switch (Color)
         {
             case GameColor.Black: return LayerMask.NameToLayer("Black Wall");
             case GameColor.White: return LayerMask.NameToLayer("White Wall");
@@ -74,10 +85,10 @@ public class Wall : MonoBehaviour
 
     private int GetNavAreaType()
     {
-        switch (color)
+        switch (Color)
         {
-            case GameColor.Black: return 4;
-            case GameColor.White: return 3;
+            case GameColor.Black: return 3;
+            case GameColor.White: return 4;
             default: throw new System.NotFiniteNumberException();
         }
     }

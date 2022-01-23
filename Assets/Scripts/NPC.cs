@@ -10,33 +10,37 @@ using UnityEngine.AI;
 [RequireComponent(typeof(CharacterSprite))]
 public class NPC : MonoBehaviour
 {
-    public GameColor Color => color;
-    [SerializeField] private GameColor color;
+    private static Dictionary<GameObject, NPC> lookup = new Dictionary<GameObject, NPC>();
+
+    public GameColor Color
+    {
+        get => color.Value;
+        private set => color.Value = value;
+    }
+
+    [SerializeField] private ReactiveProperty<GameColor> color;
 
     [SerializeField] private Material blackMaterial;
     [SerializeField] private Material whiteMaterial;
     [SerializeField] private MeshRenderer meshRenderer;
     [SerializeField] private float playerNoticeDistance = 10f;
-    
-    private NavMeshAgent navMeshAgent;
+
+    [SerializeField] private NavMeshAgent navMeshAgent;
     [SerializeField] private float pathEndThreshold = 0.1f;
     private bool hasPath = false;
 
-    private bool dead;
-
     private Coroutine wanderRoutine;
     private Collider groundCollider;
-    private CharacterSprite characterSprite;
+    [SerializeField] private CharacterSprite characterSprite;
 
     public void Setup(GameColor gameColor)
     {
-        color = gameColor;
+        Color = gameColor;
+        color.Subscribe(OnColorChange);
         characterSprite.color = gameColor;
     }
 
     protected void Start() {
-        characterSprite = GetComponent<CharacterSprite>();
-        navMeshAgent = GetComponent<NavMeshAgent>();
         if (Application.isPlaying) {
             var ground = GameObject.FindGameObjectWithTag("Ground");
             groundCollider = ground.GetComponent<MeshCollider>();
@@ -44,18 +48,15 @@ public class NPC : MonoBehaviour
         Update();
     }
 
+    protected void OnEnable()
+    {
+        lookup.Add(gameObject, this);
+    }
+
     protected void Update()
     {
-        if (meshRenderer != null)
-        {
-            meshRenderer.material = GetMaterial();
-        }
-        gameObject.layer = GetNPCLayer();
-        navMeshAgent.areaMask = GetNPCAreaMask();
-        characterSprite.color = color;
-
         if (Application.isPlaying) {
-            var playerPos = Player.Instance.ObservablePosition.Value;
+            var playerPos = Player.Instance.transform.position;
             var playerColor = Player.Instance.CurrentColor;
             var distanceToPlayer = Vector3.Distance(playerPos, transform.position);
             if (distanceToPlayer > playerNoticeDistance) {
@@ -74,7 +75,7 @@ public class NPC : MonoBehaviour
                     StopCoroutine(wanderRoutine);
                     wanderRoutine = null;
                 }
-                if (!playerColor.Equals(color)) {
+                if (playerColor != Color) {
                     //                Debug.Log(string.Format("NPC {0} run away from player {1}", color, playerColor));
                     // run away
                     var awayFromPlayer = (transform.position - playerPos).normalized * 20;
@@ -90,6 +91,23 @@ public class NPC : MonoBehaviour
                 }
             }
         }
+    }
+
+    private void OnColorChange(GameColor color)
+    {
+        if (meshRenderer != null)
+        {
+            meshRenderer.material = GetMaterial();
+        }
+        gameObject.layer = GetNPCLayer();
+        navMeshAgent.areaMask = GetNPCAreaMask();
+
+        characterSprite.color = Color;
+    }
+
+    protected void OnDisable()
+    {
+        lookup.Remove(gameObject);
     }
 
     private void SafeSetDestination(Vector3 pos) {
@@ -135,7 +153,7 @@ public class NPC : MonoBehaviour
 
     private Material GetMaterial()
     {
-        switch (color)
+        switch (Color)
         {
             case GameColor.Black: return blackMaterial;
             case GameColor.White: return whiteMaterial;
@@ -145,7 +163,7 @@ public class NPC : MonoBehaviour
 
     private int GetNPCLayer()
     {
-        switch (color)
+        switch (Color)
         {
             case GameColor.Black: return LayerMask.NameToLayer("Black NPC");
             case GameColor.White: return LayerMask.NameToLayer("White NPC");
@@ -156,7 +174,7 @@ public class NPC : MonoBehaviour
 
     private int GetNPCAreaMask()
     {
-        switch (color)
+        switch (Color)
         {
             case GameColor.Black: return NavAreaTypeUtil.CreateMask(NavAreaType.Walkable, NavAreaType.Jump, NavAreaType.BlackDoor);
             case GameColor.White: return NavAreaTypeUtil.CreateMask(NavAreaType.Walkable, NavAreaType.Jump, NavAreaType.WhiteDoor);
@@ -167,5 +185,10 @@ public class NPC : MonoBehaviour
     public void Die()
     {
         Destroy(gameObject);
+    }
+
+    public static bool TryGetNPC(GameObject gameObject, out NPC npc)
+    {
+        return lookup.TryGetValue(gameObject, out npc);
     }
 }
