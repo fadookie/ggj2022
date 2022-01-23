@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.AI;
 
 [ExecuteAlways]
+[RequireComponent(typeof(CharacterSprite))]
 public class NPC : MonoBehaviour
 {
     public GameColor Color => color;
@@ -25,13 +26,16 @@ public class NPC : MonoBehaviour
 
     private Coroutine wanderRoutine;
     private Collider groundCollider;
+    private CharacterSprite characterSprite;
 
     public void Setup(GameColor gameColor)
     {
         color = gameColor;
+        characterSprite.color = gameColor;
     }
 
     protected void Start() {
+        characterSprite = GetComponent<CharacterSprite>();
         navMeshAgent = GetComponent<NavMeshAgent>();
         if (Application.isPlaying) {
             var ground = GameObject.FindGameObjectWithTag("Ground");
@@ -48,6 +52,7 @@ public class NPC : MonoBehaviour
         }
         gameObject.layer = GetNPCLayer();
         navMeshAgent.areaMask = GetNPCAreaMask();
+        characterSprite.color = color;
 
         if (Application.isPlaying) {
             var playerPos = Player.Instance.ObservablePosition.Value;

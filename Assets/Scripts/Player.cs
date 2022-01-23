@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UniRx;
 
+[RequireComponent(typeof(CharacterSprite))]
 public class Player : MonoBehaviour
 {
     public GameColor CurrentColor => currentColor.Value;
@@ -26,6 +27,8 @@ public class Player : MonoBehaviour
 
     [SerializeField] private Material blackMaterial;
     [SerializeField] private Material whiteMaterial;
+    
+    private CharacterSprite characterSprite;
 
     void Awake() {
         instance = this;
@@ -33,7 +36,8 @@ public class Player : MonoBehaviour
 
     protected void Start()
     {
-
+        characterSprite = GetComponent<CharacterSprite>();
+        characterSprite.posessed = true;
     }
 
     protected void Update()
@@ -48,6 +52,7 @@ public class Player : MonoBehaviour
         characterController.Move(direction.normalized * speed * Time.deltaTime);
 
         meshRenderer.material = GetPlayerMaterial();
+        characterSprite.color = currentColor.Value;
 
         gameObject.layer = GetPlayerLayer();
         observablePosition.Value = transform.position;
