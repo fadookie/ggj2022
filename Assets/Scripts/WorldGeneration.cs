@@ -10,7 +10,13 @@ using Random = UnityEngine.Random;
 [ExecuteAlways]
 public class WorldGeneration : MonoBehaviour
 {
-    private bool[,] grid;
+    private struct GridTile
+    {
+        public bool occupied;
+        public GameColor? color;
+    }
+
+    private GridTile[,] grid;
 
 
     [SerializeField] bool rebuild;
@@ -95,10 +101,10 @@ public class WorldGeneration : MonoBehaviour
         {
             ground.Size = mapSize;
         }
-        grid = new bool[mapSize.x, mapSize.y];
+        grid = new GridTile[mapSize.x, mapSize.y];
         int wallCount = Mathf.CeilToInt((mapSize.x * mapSize.y) / wallPerXSquareUnits);
         RectInt mapBounds = GetMapBounds();
-        MarkFilled(new RectInt(Mathf.RoundToInt(mapSize.x / 2f) - 2, Mathf.RoundToInt(mapSize.y / 2f) - 2, 4, 4));
+        MarkFilled(new RectInt(Mathf.RoundToInt(mapSize.x / 2f) - 4, Mathf.RoundToInt(mapSize.y / 2f) - 4, 8, 8));
 
         Vector3 GridToWorld(Vector2 gridPosition)
         {
@@ -114,14 +120,18 @@ public class WorldGeneration : MonoBehaviour
                 bool horizontal = Random.value < .5f;
                 int length = Random.Range(wallMinLength, wallMaxLength);
                 Vector2Int size = new Vector2Int(horizontal ? length : 1, horizontal ? 1 : length);
-                Vector2Int gridPosition = new Vector2Int(Mathf.FloorToInt(Random.Range(0, mapBounds.width + 1 - size.x) / 2f) * 2, Mathf.FloorToInt(Random.Range(0, mapBounds.height + 1 - size.y) / 2f) * 2);
-                RectInt gridBounds = new RectInt(gridPosition, size);
-
-                if (IsOpen(gridBounds))
+                Vector2Int gridPosition = new Vector2Int(1+Mathf.FloorToInt(Random.Range(0, mapBounds.width - size.x -2) / 2f) * 2, 1+Mathf.FloorToInt(Random.Range(1, mapBounds.height - size.y-2) / 2f) * 2);
+                RectInt shapeGridBounds = new RectInt(gridPosition, size);
+                RectInt expandedShapeGridBounds = shapeGridBounds;
+                expandedShapeGridBounds.xMin -= 1;
+                expandedShapeGridBounds.yMin -= 1;
+                expandedShapeGridBounds.xMax += 1;
+                expandedShapeGridBounds.yMax += 1;
+                if (IsOpen(shapeGridBounds) && IsOpen(expandedShapeGridBounds, gameColor))
                 {
-                    MarkFilled(gridBounds);
-                    var wall = ImprovedInstantiate(wallPrefab, GridToWorld(gridBounds.center), wallParent);
-                    wall.Setup(gameColor, new Vector3(gridBounds.size.x, 1, gridBounds.size.y));
+                    MarkFilled(shapeGridBounds, gameColor);
+                    var wall = ImprovedInstantiate(wallPrefab, GridToWorld(shapeGridBounds.center), wallParent);
+                    wall.Setup(gameColor, new Vector3(shapeGridBounds.size.x, 1, shapeGridBounds.size.y));
                     break;
                 }
             }
@@ -135,6 +145,7 @@ public class WorldGeneration : MonoBehaviour
 
         int npcCount = Mathf.CeilToInt((mapSize.x * mapSize.y) / npcPerXSquareUnits);
         GameColor lastNPCColor = GameColor.Black;//player color
+        HashSet<Vector2Int> npcLocations = new HashSet<Vector2Int>();
         for (int i = 0; i < npcCount; i++)
         {
             int tries = 100;
@@ -142,46 +153,52 @@ public class WorldGeneration : MonoBehaviour
             {
                 var position = new Vector2Int(Random.Range(0, mapBounds.width), Random.Range(0, mapBounds.height));
                 var rect = new RectInt(position, Vector2Int.one);
-                if (IsOpen(rect))
+                var color = lastNPCColor.GetOpposite();
+                if (!npcLocations.Contains(position) && IsOpen(rect, color))
                 {
-                    MarkFilled(rect);
+                    MarkFilled(rect, color);
+                    npcLocations.Add(position);
                     var npc = ImprovedInstantiate(npcPrefab, GridToWorld(rect.center), npcParent);
-                    var color = lastNPCColor.GetOpposite();
+                    
                     lastNPCColor = color;
                     npc.Setup(color);
                     break;
                 }
-
             }
         }
         built = true;
         building = null;
     }
-    
+    private void MarkFilled(Vector2Int gridPosition, GameColor? gameColor = null)
+    {
+        grid[gridPosition.x, gridPosition.y].color = gameColor;
+        grid[gridPosition.x, gridPosition.y].occupied = true;
+    }
 
-    private void MarkFilled(RectInt gridRect)
+    private void MarkFilled(RectInt gridRect, GameColor? gameColor = null)
     {
         for (int x = gridRect.xMin; x < gridRect.xMax; x++)
         {
             for (int y = gridRect.yMin; y < gridRect.yMax; y++)
             {
-                grid[x, y] = true;
+                MarkFilled(new Vector2Int(x,y), gameColor);
             }
         }
     }
 
-    private bool IsOpen(Vector2Int gridPosition)
+    private bool IsOpen(Vector2Int gridPosition, GameColor? gameColor = null)
     {
-        return !grid[gridPosition.x, gridPosition.y];
+        var existing = grid[gridPosition.x, gridPosition.y];
+        return (!existing.occupied || existing.color == gameColor);
     }
 
-    private bool IsOpen(RectInt gridRect)
+    private bool IsOpen(RectInt gridRect, GameColor? gameColor = null)
     {
         for (int x = gridRect.xMin; x < gridRect.xMax; x++)
         {
             for (int y = gridRect.yMin; y < gridRect.yMax; y++)
             {
-                if (grid[x, y])
+                if(!IsOpen(new Vector2Int(x, y), gameColor))
                 {
                     return false;
                 }
