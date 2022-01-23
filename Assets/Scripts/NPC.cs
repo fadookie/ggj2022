@@ -64,7 +64,7 @@ public class NPC : MonoBehaviour
 
     private const float tau = Mathf.PI * 2;
 
-    private float lastUpdatedFleeTargetFlee;
+    private float lastUpdatedFleeTargetFlee = -999;
 
     protected void Update()
     {
