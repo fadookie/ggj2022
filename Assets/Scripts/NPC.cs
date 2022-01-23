@@ -88,6 +88,14 @@ public class NPC : MonoBehaviour
         }
     }
 
+    protected void LateUpdate()
+    {
+        meshRenderer.transform.rotation = Quaternion.Euler(90, 0, 0);
+        var scale = meshRenderer.transform.localScale;
+        scale.x = Mathf.Abs(meshRenderer.transform.localScale.x) * ((transform.forward.x >= 0) ? 1 : -1);
+        meshRenderer.transform.localScale = scale;
+    }
+
     private void OnColorChange(GameColor color)
     {
         if (meshRenderer != null)

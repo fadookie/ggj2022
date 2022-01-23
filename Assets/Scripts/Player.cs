@@ -27,6 +27,8 @@ public class Player : MonoBehaviour
     
     private CharacterSprite characterSprite;
 
+    private Vector3 lastDirection;
+
     void Awake() {
         instance = this;
     }
@@ -37,7 +39,6 @@ public class Player : MonoBehaviour
         characterSprite.posessed = true;
         currentColor.Subscribe(OnColorChange);
     }
-
     protected void Update()
     {
         Vector3 direction = Vector3.zero;
@@ -47,7 +48,19 @@ public class Player : MonoBehaviour
         if (Input.GetKey(KeyCode.W)) direction.z += 1;
         if (Input.GetKey(KeyCode.S)) direction.z -= 1;
 
-        characterController.Move(direction.normalized * speed * Time.deltaTime);
+        if(direction != Vector3.zero)
+        {
+            characterController.Move(direction.normalized * speed * Time.deltaTime);
+            lastDirection = direction;
+        }
+    }
+
+    protected void LateUpdate()
+    {
+        meshRenderer.transform.rotation = Quaternion.Euler(90, 0, 0);
+        var scale = meshRenderer.transform.localScale;
+        scale.x = Mathf.Abs(meshRenderer.transform.localScale.x) * ((lastDirection.x >= 0) ? 1 : -1);
+        meshRenderer.transform.localScale = scale;
     }
 
     private void OnColorChange(GameColor color)
