@@ -17,7 +17,7 @@ public class CharacterSprite : MonoBehaviour
     [SerializeField] private Renderer renderer;
     
     public GameColor color;
-    public bool posessed;
+    public bool possessed;
     public bool angry;
 
     // Update is called once per frame
@@ -28,13 +28,13 @@ public class CharacterSprite : MonoBehaviour
     private Material GetActiveMaterial() {
         switch (color) {
             case GameColor.Black: {
-                if (posessed) {
+                if (possessed) {
                     return angry ? blackCharRedEyesAngry : blackCharRedEyesScared;
                 }
                 return angry ? blackCharGreyEyesAngry : blackCharGreyEyesScared;
             }
             case GameColor.White: {
-                if (posessed) {
+                if (possessed) {
                     return angry ? whiteCharRedEyesAngry : whiteCharRedEyesScared;
                 }
                 return angry ? whiteCharGreyEyesAngry : whiteCharGreyEyesScared;

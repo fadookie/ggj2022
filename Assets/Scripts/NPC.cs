@@ -36,10 +36,12 @@ public class NPC : MonoBehaviour
     [SerializeField] private float walkSpeed = 1.5f;
     [SerializeField] private float runSpeed = 2.75f;
 
+    private CapsuleCollider capsuleCollider;
     private Collider groundCollider;
     [SerializeField] private CharacterSprite characterSprite;
 
     private bool noticedPlayer;
+    private bool wasCollidingWithPlayer;
 
     private float awarenessTimeOffset;
     private float awarenessVariationPeriod = 5;
@@ -53,6 +55,7 @@ public class NPC : MonoBehaviour
     }
 
     protected void Start() {
+        capsuleCollider = GetComponent<CapsuleCollider>();
         if (Application.isPlaying) {
             var ground = GameObject.FindGameObjectWithTag("Ground");
             groundCollider = ground.GetComponent<MeshCollider>();
@@ -88,9 +91,10 @@ public class NPC : MonoBehaviour
             }
 
             var playerColor = Player.Instance.CurrentColor;
-            var distanceToPlayer = Vector3.Distance(playerPos, transform.position);
+            var distanceToPlayer = Vector2.Distance(playerPos.ToVector2(), transform.position.ToVector2());
             bool notice = distanceToPlayer < playerNoticeDistance;
             bool ignore = distanceToPlayer > playerIgnoreDistance;
+            CollisionCheck(distanceToPlayer);
 
             if (ignore || !(notice || noticedPlayer) ) {
                 // Wander around
@@ -138,6 +142,20 @@ public class NPC : MonoBehaviour
         var scale = meshRenderer.transform.localScale;
         scale.x = Mathf.Abs(meshRenderer.transform.localScale.x) * ((transform.forward.x >= 0) ? 1 : -1);
         meshRenderer.transform.localScale = scale;
+    }
+
+    /**
+     * Unity collision detection isn't working reliably for some reason so we'll just do it ourselves
+     */
+    void CollisionCheck(float distanceToPlayer) {
+        if (distanceToPlayer <= Player.Instance.Radius + capsuleCollider.radius) {
+            if (Player.Instance.isActiveAndEnabled && !wasCollidingWithPlayer) {
+                Player.Instance.OnNPCCollisionEnter(this);
+                wasCollidingWithPlayer = true;
+            }
+        } else {
+            wasCollidingWithPlayer = false;
+        }
     }
 
     private void OnColorChange(GameColor color)

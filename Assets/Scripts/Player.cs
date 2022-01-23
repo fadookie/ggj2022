@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UniRx;
+using UnityEngine.Jobs;
 
 [RequireComponent(typeof(CharacterSprite))]
 public class Player : MonoBehaviour
@@ -14,6 +15,8 @@ public class Player : MonoBehaviour
     public static Player Instance {
         get { return instance; }
     }
+
+    public float Radius => capsuleCollider.radius;
 
     [SerializeField] private ReactiveProperty<GameColor> currentColor;
 
@@ -29,16 +32,25 @@ public class Player : MonoBehaviour
 
     private Vector3 lastDirection;
 
+    private float possessionStartTime;
+    [SerializeField] private float possessionTimerDurationSec;
+    [SerializeField] private float damageTimerReductionSec;
+
+    private CapsuleCollider capsuleCollider;
+
     void Awake() {
         instance = this;
+        capsuleCollider = GetComponent<CapsuleCollider>();
     }
 
     protected void Start()
     {
         characterSprite = GetComponent<CharacterSprite>();
-        characterSprite.posessed = true;
+        characterSprite.possessed = true;
         currentColor.Subscribe(OnColorChange);
+        possessionStartTime = Time.time;
     }
+    
     protected void Update()
     {
         Vector3 direction = Vector3.zero;
@@ -53,6 +65,11 @@ public class Player : MonoBehaviour
             characterController.Move(direction.normalized * speed * Time.deltaTime);
             lastDirection = direction;
         }
+
+//        Debug.Log($"time:{Time.time} posStartTime:{possessionStartTime} duration:{Time.time - possessionStartTime}");
+        if (Time.time - possessionStartTime > possessionTimerDurationSec) {
+            Die();
+        }
     }
 
     protected void LateUpdate()
@@ -61,6 +78,15 @@ public class Player : MonoBehaviour
         var scale = meshRenderer.transform.localScale;
         scale.x = Mathf.Abs(meshRenderer.transform.localScale.x) * ((lastDirection.x >= 0) ? 1 : -1);
         meshRenderer.transform.localScale = scale;
+        
+        var position = transform.position;
+        position.y = 0;
+        transform.position = position;
+    }
+
+    private void Die() {
+        gameObject.SetActive(false);
+        Debug.LogWarning($"Player died. time:{Time.time} posStartTime:{possessionStartTime} duration:{Time.time - possessionStartTime}");
     }
 
     private void OnColorChange(GameColor color)
@@ -70,26 +96,27 @@ public class Player : MonoBehaviour
 
         gameObject.layer = GetPlayerLayer();
     }
-
-    protected void OnControllerColliderHit(ControllerColliderHit hit)
-    {
-        if(NPC.TryGetNPC(hit.gameObject, out NPC npc))
-        {
-            if (npc.Color == currentColor.Value)
-            {
-                //death
+    
+    public void OnNPCCollisionEnter(NPC npc) {
+//        Debug.Log($"OnNPCCollisionEnter: {npc}");
+        if (npc.Color == currentColor.Value) {
+            // damage
+            Debug.LogWarning($"OnNPCCollisionEnter NPC hit current timer: {Time.time - possessionStartTime} new timer:{Time.time - (possessionStartTime - damageTimerReductionSec)}");
+            possessionStartTime -= damageTimerReductionSec;
+            // Timer rundown will be checked next update
+        } else {
+            StartCoroutine(DelayedSetPosition(npc.transform.position));
+            currentColor.Value = npc.Color;
+            if (ScoreTracker.TryGetInstance(out var scoreTracker)) {
+                scoreTracker.Score += 1;
             }
-            else
-            {
-                StartCoroutine(DelayedSetPosition(npc.transform.position));
-                currentColor.Value = npc.Color;
-                if(ScoreTracker.TryGetInstance(out var scoreTracker))
-                {
-                    scoreTracker.Score += 1;
-                }
-                npc.Die();
-            }
+            npc.Die();
+            possessionStartTime = Time.time;
         }
+    }
+
+    private void OnCollisionStay(Collision other) {
+        Debug.Log($"OnCollisionStay: {other} name:{other.gameObject.name}");
     }
 
     IEnumerator DelayedSetPosition(Vector3 position)
