@@ -35,6 +35,9 @@ public class Player : MonoBehaviour
     private float possessionStartTime;
     [SerializeField] private float possessionTimerDurationSec;
     [SerializeField] private float damageTimerReductionSec;
+    
+    public float PossessionTimerDurationSec => possessionTimerDurationSec;
+    public float ElapsedPossessionTime => Time.time - possessionStartTime;
 
     private CapsuleCollider capsuleCollider;
 
@@ -67,7 +70,7 @@ public class Player : MonoBehaviour
         }
 
 //        Debug.Log($"time:{Time.time} posStartTime:{possessionStartTime} duration:{Time.time - possessionStartTime}");
-        if (Time.time - possessionStartTime > possessionTimerDurationSec) {
+        if (ElapsedPossessionTime > possessionTimerDurationSec) {
             Die();
         }
     }
@@ -86,7 +89,7 @@ public class Player : MonoBehaviour
 
     private void Die() {
         gameObject.SetActive(false);
-        Debug.LogWarning($"Player died. time:{Time.time} posStartTime:{possessionStartTime} duration:{Time.time - possessionStartTime}");
+        Debug.LogWarning($"Player died. time:{Time.time} posStartTime:{possessionStartTime} duration:{ElapsedPossessionTime}");
     }
 
     private void OnColorChange(GameColor color)
@@ -101,7 +104,7 @@ public class Player : MonoBehaviour
 //        Debug.Log($"OnNPCCollisionEnter: {npc}");
         if (npc.Color == currentColor.Value) {
             // damage
-            Debug.LogWarning($"OnNPCCollisionEnter NPC hit current timer: {Time.time - possessionStartTime} new timer:{Time.time - (possessionStartTime - damageTimerReductionSec)}");
+            Debug.LogWarning($"OnNPCCollisionEnter NPC hit current timer: {ElapsedPossessionTime} new timer:{Time.time - (possessionStartTime - damageTimerReductionSec)}");
             possessionStartTime -= damageTimerReductionSec;
             // Timer rundown will be checked next update
         } else {
