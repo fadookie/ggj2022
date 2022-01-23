@@ -29,7 +29,6 @@ public class NPC : MonoBehaviour
     [SerializeField] private float pathEndThreshold = 0.1f;
     private bool hasPath = false;
 
-    private Coroutine wanderRoutine;
     private Collider groundCollider;
     [SerializeField] private CharacterSprite characterSprite;
 
@@ -61,6 +60,7 @@ public class NPC : MonoBehaviour
             var distanceToPlayer = Vector3.Distance(playerPos, transform.position);
             if (distanceToPlayer > playerNoticeDistance) {
                 // Wander around
+                characterSprite.angry = false;
                 if (AtEndOfPath()) {
                     var bounds = groundCollider.bounds;
                     var newTarget = new Vector3(UnityEngine.Random.Range(bounds.min.x, bounds.max.x), 0,
@@ -70,14 +70,9 @@ public class NPC : MonoBehaviour
                     SafeSetDestination(newTarget);
                 }
             } else {
-                if (wanderRoutine != null) {
-                    Debug.LogWarning("Wander stop");
-                    StopCoroutine(wanderRoutine);
-                    wanderRoutine = null;
-                }
                 if (playerColor != Color) {
-                    //                Debug.Log(string.Format("NPC {0} run away from player {1}", color, playerColor));
                     // run away
+                    characterSprite.angry = false;
                     var awayFromPlayer = (transform.position - playerPos).normalized * 20;
                     NavMeshHit closestHit;
                     if (NavMesh.SamplePosition(awayFromPlayer, out closestHit, 100f,
@@ -85,8 +80,8 @@ public class NPC : MonoBehaviour
                         SafeSetDestination(closestHit.position);
                     }
                 } else {
-                    //                Debug.Log(string.Format("NPC {0} chase player {1}", color, playerColor));
                     // chase player
+                    characterSprite.angry = true;
                     SafeSetDestination(playerPos);
                 }
             }
@@ -117,25 +112,6 @@ public class NPC : MonoBehaviour
             }
         } 
     }
-
-//    private IEnumerator Wander() {
-//        Debug.Log("Wander routine start");
-//        while(true) {
-////            yield return new WaitForSeconds(1f);
-////            NavMeshHit closestHit;
-////            if (NavMesh.SamplePosition(newTarget, out closestHit, 100f,
-////                navMeshAgent.areaMask)) {
-////                Debug.Log(string.Format("wander SetDestination:{0}", closestHit.position));
-////                SafeSetDestination(closestHit.position);
-////            } else {
-////                Debug.LogWarning("wander no closest point, Bail");
-////            }
-//            while(!AtEndOfPath()) {
-//                yield return null;
-//            }
-//            Debug.LogWarning("wander path complete");
-//        }
-//    }
     
     bool AtEndOfPath()
     {
