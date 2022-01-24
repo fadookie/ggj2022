@@ -16,16 +16,19 @@ public class OptionsMenu : MonoBehaviour
 
     private List<VolumeControl> volumeControls = new List<VolumeControl>();
 
-    protected void Start()
+    protected IEnumerator Start()
     {
-        volumeControlTemplate.gameObject.SetActive(false);
         doneButton.onClick.AddListener(() => gameObject.SetActive(false));
-
+        yield return null;
+        volumeControlTemplate.transform.parent.gameObject.SetActive(false);
+        yield return null;
+        volumeControlTemplate.transform.parent.gameObject.SetActive(true);
     }
 
     protected void OnEnable()
     {
-        while(volumeControls.Count < volumeParameters.Length)
+        volumeControlTemplate.gameObject.SetActive(false);
+        while (volumeControls.Count < volumeParameters.Length)
         {
             volumeControls.Add(Instantiate(volumeControlTemplate, volumeControlTemplate.transform.parent));
         }
@@ -38,7 +41,6 @@ public class OptionsMenu : MonoBehaviour
         {
             volumeControls[i].gameObject.SetActive(false);
         }
-
         Time.timeScale = 0;
     }
 

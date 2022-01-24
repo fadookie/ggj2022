@@ -805,9 +805,9 @@ MonoBehaviour:
   doneButton: {fileID: 7197687435759762197}
   volumeControlTemplate: {fileID: 1088663762976792172}
   volumeParameters:
-  - Master
-  - Music
-  - SFX
+  - Master Volume
+  - Music Volume
+  - SFX Volume
 --- !u!1 &5063632048934780952
 GameObject:
   m_ObjectHideFlags: 0
@@ -818,7 +818,7 @@ GameObject:
   m_Component:
   - component: {fileID: 675719622457629679}
   - component: {fileID: 5468448479172073423}
-  - component: {fileID: 1239521280799085190}
+  - component: {fileID: 2701021465210032748}
   m_Layer: 5
   m_Name: Volume Controls
   m_TagString: Untagged
@@ -872,7 +872,7 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!114 &1239521280799085190
+--- !u!114 &2701021465210032748
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1024,7 +1024,7 @@ MonoBehaviour:
   m_MinWidth: -1
   m_MinHeight: -1
   m_PreferredWidth: -1
-  m_PreferredHeight: -1
+  m_PreferredHeight: 35
   m_FlexibleWidth: -1
   m_FlexibleHeight: 0
   m_LayoutPriority: 1
