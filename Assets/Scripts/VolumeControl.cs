@@ -18,7 +18,7 @@ public class VolumeControl : MonoBehaviour
 
         audioMixer.GetFloat(parameter, out float volume);
         slider.value = volume;
-        text.text = parameter + " Volume";
+        text.text = parameter;
     }
 
     protected void Update()

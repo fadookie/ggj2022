@@ -266,6 +266,8 @@ public class WorldGeneration : MonoBehaviour
             var thing = (T)UnityEditor.PrefabUtility.InstantiatePrefab(prefab, parent);
             thing.transform.position = position;
             return thing;
+#else 
+            throw new System.NotImplementedException();
 #endif
         }
     }
