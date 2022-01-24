@@ -35,7 +35,8 @@ public class NPC : MonoBehaviour
     private bool hasPath = false;
 
     [SerializeField] private float walkSpeed = 1.5f;
-    [SerializeField] private float runSpeed = 2.75f;
+    [SerializeField] private float chaseSpeed = 2.5f;
+    [SerializeField] private float fleeSpeed = 2f;
 
     private CapsuleCollider capsuleCollider;
     private Collider groundCollider;
@@ -76,6 +77,14 @@ public class NPC : MonoBehaviour
 
     private float lastUpdatedFleeTargetFlee = -999;
 
+    private IEnumerator sizeRoutine;
+
+    private Vector3 normalMeshScale = Vector3.one;
+
+    enum AIState { Wander, Chase, Flee }
+
+    private AIState aiState;
+
     protected void Update()
     {
         if (Application.isPlaying)
@@ -106,6 +115,11 @@ public class NPC : MonoBehaviour
                 characterSprite.angry = false;
                 if (noticedPlayer || AtEndOfPath() || !navMeshAgent.hasPath)
                 {
+                    if (aiState != AIState.Wander)
+                    {
+                        aiState = AIState.Wander;
+                        sizeRoutine = SizePulse(Size, 1);
+                    }
                     noticedPlayer = false; 
                     navMeshAgent.ResetPath();
                     if (NPCManager.Instance.NPCsPendingPath < 10)
@@ -121,9 +135,14 @@ public class NPC : MonoBehaviour
             }
             else if(notice || noticedPlayer) {
                 noticedPlayer = true;
-                navMeshAgent.speed = runSpeed;
                 if (playerColor != Color) {
                     // run away
+                    if (aiState != AIState.Flee)
+                    {
+                        aiState = AIState.Flee;
+                        sizeRoutine = SizePulse(.85f, .85f);
+                    }
+                    navMeshAgent.speed = fleeSpeed;
                     characterSprite.angry = false;
                     if (lastUpdatedFleeTargetFlee < Time.time - 1f)
                     {
@@ -138,11 +157,21 @@ public class NPC : MonoBehaviour
                     }
                 } else {
                     // chase player
+                    if (aiState != AIState.Chase)
+                    {
+                        aiState = AIState.Chase;
+                        sizeRoutine = SizePulse(1.25f, 1f);
+                    }
+                    navMeshAgent.speed = chaseSpeed;
                     characterSprite.angry = true;
                     SafeSetDestination(playerPos);
                 }
             }
             NPCManager.Instance.UpdateIsPendingPath(this, PendingPath);
+            if(sizeRoutine != null && !sizeRoutine.MoveNext())
+            {
+                sizeRoutine = null;
+            }
         }
     }
 
@@ -153,6 +182,45 @@ public class NPC : MonoBehaviour
         scale.x = Mathf.Abs(meshRenderer.transform.localScale.x) * ((transform.forward.x >= 0) ? 1 : -1);
         meshRenderer.transform.localScale = scale;
     }
+
+    private float sizeVelocity;
+
+    IEnumerator SizePulse(float initial, float final)
+    {
+        /*{
+            float duration = .25f;
+            float t = Time.time + duration;
+            while (Time.time <= t)
+            {
+                Size = Mathf.SmoothDamp(Size, sizeGoal, ref sizeVelocity, 1);
+                yield return null;
+            }
+        }*/
+        Size = initial;
+        {
+            float duration = 1;
+            float t = Time.time + duration + 1;
+            while (Time.time <= t)
+            {
+                Size = Mathf.SmoothDamp(Size, final, ref sizeVelocity, 1);
+                yield return null;
+            }
+        }
+        sizeVelocity = 0;
+        Size = final;
+    }
+
+    private float Size
+    {
+        get => meshRenderer.transform.localScale.z / normalMeshScale.z;
+        set
+        {
+            var scale = normalMeshScale;
+            scale.x = normalMeshScale.x * ((transform.forward.x >= 0) ? 1 : -1);
+            meshRenderer.transform.localScale = scale * value;
+        }
+    }
+
 
     /**
      * Unity collision detection isn't working reliably for some reason so we'll just do it ourselves
@@ -183,7 +251,10 @@ public class NPC : MonoBehaviour
     protected void OnDisable()
     {
         lookup.Remove(gameObject);
-        NPCManager.Instance.UnregisterNPC(this);
+        if (NPCManager.Instance != null)
+        {
+            NPCManager.Instance.UnregisterNPC(this);
+        }
 
     }
 

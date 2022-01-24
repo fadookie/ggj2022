@@ -1,11 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-public class PauseMenu : MonoBehaviour
+
+public class GameOverMenu : MonoBehaviour
 {
-    [SerializeField] private Button continueButton;
     [SerializeField] private Button newGameButton;
     [SerializeField] private Button mainMenuButton;
     [SerializeField] private Button instructionsButton;
@@ -15,7 +13,6 @@ public class PauseMenu : MonoBehaviour
 
     protected void Start()
     {
-        continueButton.onClick.AddListener(() => gameObject.SetActive(false));
         newGameButton.onClick.AddListener(() => SceneManager.LoadScene("Game"));
         mainMenuButton.onClick.AddListener(() => SceneManager.LoadScene("Main Menu"));
         instructionsButton.onClick.AddListener(() => instructions.SetActive(true));

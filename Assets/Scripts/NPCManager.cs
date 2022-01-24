@@ -2,8 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
-public class NPCManager
+public class NPCManager : MonoBehaviour
 {
     public IReadOnlyCollection<NPC> BlackNpcs => blackNpcs;
     public IReadOnlyCollection<NPC> WhiteNpcs => whiteNpcs;
@@ -15,8 +16,8 @@ public class NPCManager
     private readonly HashSet<NPC> whiteNpcs = new HashSet<NPC>();
     private readonly HashSet<NPC> allNpcs = new HashSet<NPC>();
 
-    private static readonly Lazy<NPCManager> instance = new Lazy<NPCManager>(() => new NPCManager());
-    public static NPCManager Instance => instance.Value;
+    private static NPCManager instance;
+    public static NPCManager Instance => instance != null || !Application.isPlaying ? instance : instance = new GameObject("NPCManager").AddComponent<NPCManager>();
 
     private HashSet<NPC> npcsPendingPath = new HashSet<NPC>();
 
@@ -59,14 +60,8 @@ public class NPCManager
     
     public void UnregisterNPC(NPC npc) {
         allNpcs.Remove(npc);
+        blackNpcs.Remove(npc);
+        whiteNpcs.Remove(npc);
         UpdateIsPendingPath(npc, false);
-        switch (npc.Color) {
-                case GameColor.Black:
-                    blackNpcs.Remove(npc);
-                    break;
-                case GameColor.White:
-                    whiteNpcs.Remove(npc);
-                    break;
-        }
     }
 }

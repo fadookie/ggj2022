@@ -41,6 +41,12 @@ public class Player : MonoBehaviour
 
     private CapsuleCollider capsuleCollider;
 
+    private float timeLastDamaged= -9999;
+
+    float invulnurabilityPeriodAfterDamage = 1;
+
+    private bool dead;
+
     void Awake() {
         instance = this;
         capsuleCollider = GetComponent<CapsuleCollider>();
@@ -56,22 +62,25 @@ public class Player : MonoBehaviour
     
     protected void Update()
     {
-        Vector3 direction = Vector3.zero;
-
-        if (Input.GetKey(KeyCode.D)) direction.x += 1;
-        if (Input.GetKey(KeyCode.A)) direction.x -= 1;
-        if (Input.GetKey(KeyCode.W)) direction.z += 1;
-        if (Input.GetKey(KeyCode.S)) direction.z -= 1;
-
-        if(direction != Vector3.zero)
+        if (!dead)
         {
-            characterController.Move(direction.normalized * speed * Time.deltaTime);
-            lastDirection = direction;
-        }
+            Vector3 direction = Vector3.zero;
 
-//        Debug.Log($"time:{Time.time} posStartTime:{possessionStartTime} duration:{Time.time - possessionStartTime}");
-        if (ElapsedPossessionTime > possessionTimerDurationSec) {
-            Die();
+            if (Input.GetKey(KeyCode.D)) direction.x += 1;
+            if (Input.GetKey(KeyCode.A)) direction.x -= 1;
+            if (Input.GetKey(KeyCode.W)) direction.z += 1;
+            if (Input.GetKey(KeyCode.S)) direction.z -= 1;
+
+            if (direction != Vector3.zero)
+            {
+                characterController.Move(direction.normalized * speed * Time.deltaTime);
+                lastDirection = direction;
+            }
+
+//            Debug.Log($"time:{Time.time} posStartTime:{possessionStartTime} duration:{Time.time - possessionStartTime}");
+            if (ElapsedPossessionTime > possessionTimerDurationSec) {
+                Die();
+            }
         }
     }
 
@@ -88,9 +97,37 @@ public class Player : MonoBehaviour
     }
 
     private void Die() {
-        gameObject.SetActive(false);
-        AudioManager.Instance.PlaySound(AudioManager.Sound.Death);
-        Debug.LogWarning($"Player died. time:{Time.time} posStartTime:{possessionStartTime} duration:{ElapsedPossessionTime}");
+        if (!dead)
+        {
+            dead = true;
+            AudioManager.Instance.PlaySound(AudioManager.Sound.Death);
+            Debug.LogWarning($"Player died. time:{Time.time} posStartTime:{possessionStartTime} duration:{ElapsedPossessionTime}");
+            StartCoroutine(DeathSequence());
+        }
+    }
+
+    private IEnumerator DeathSequence()
+    {
+        GameUI gameUI = FindObjectOfType<GameUI>();
+
+        gameUI.DeathFade.gameObject.SetActive(true);
+        float goalAlpha = gameUI.DeathFade.color.a;
+        Color color = gameUI.DeathFade.color;
+        color.a = 0;
+        gameUI.DeathFade.color = color;
+
+        float startTime = Time.time;
+        float duration = 2;
+        while(Time.time < startTime + duration)
+        {
+            color.a = Mathf.Lerp(0, goalAlpha, (Time.time - startTime) / duration);
+            gameUI.DeathFade.color = color;
+            yield return null;
+        }
+        color.a = goalAlpha;
+        gameUI.DeathFade.color = color;
+        gameUI.DeathFade.gameObject.SetActive(false);
+        gameUI.GameOverMenu.gameObject.SetActive(true);
     }
 
     private void OnColorChange(GameColor color)
@@ -100,25 +137,38 @@ public class Player : MonoBehaviour
 
         gameObject.layer = GetPlayerLayer();
     }
-    
+
+    protected void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        if (NPC.TryGetNPC(hit.gameObject, out NPC npc))
+        {
+            OnNPCCollisionEnter(npc);
+        }
+    }
+
     public void OnNPCCollisionEnter(NPC npc) {
-//        Debug.Log($"OnNPCCollisionEnter: {npc}");
-        if (npc.Color == currentColor.Value) {
-            // damage
-            Debug.LogWarning($"OnNPCCollisionEnter NPC hit current timer: {ElapsedPossessionTime} new timer:{Time.time - (possessionStartTime - damageTimerReductionSec)}");
-            possessionStartTime -= damageTimerReductionSec;
-            // Timer rundown will be checked next update
-            AudioManager.Instance.PlaySound(AudioManager.Sound.TakeDamage);
-        } else {
-            // possess enemy
-            StartCoroutine(DelayedSetPosition(npc.transform.position));
-            currentColor.Value = npc.Color;
-            if (ScoreTracker.TryGetInstance(out var scoreTracker)) {
-                scoreTracker.Score += 1;
+        if (!dead)
+        {
+//            Debug.Log($"OnNPCCollisionEnter: {npc}");
+            if (npc.Color == currentColor.Value) {
+                // damage
+                if (Time.time > timeLastDamaged + invulnurabilityPeriodAfterDamage)
+                {
+                    timeLastDamaged = Time.time;
+                    Debug.LogWarning($"OnNPCCollisionEnter NPC hit current timer: {ElapsedPossessionTime} new timer:{Time.time - (possessionStartTime - damageTimerReductionSec)}");
+                    possessionStartTime -= damageTimerReductionSec;
+                    // Timer rundown will be checked next update
+                }
+            } else {
+                StartCoroutine(DelayedSetPosition(npc.transform.position));
+                currentColor.Value = npc.Color;
+                if (ScoreTracker.TryGetInstance(out var scoreTracker)) {
+                    scoreTracker.Score += 1;
+                }
+                npc.Die();
+                possessionStartTime = Time.time;
+                AudioManager.Instance.PlaySound(AudioManager.Sound.Possession);
             }
-            npc.Die();
-            possessionStartTime = Time.time;
-            AudioManager.Instance.PlaySound(AudioManager.Sound.Possession);
         }
     }
 
