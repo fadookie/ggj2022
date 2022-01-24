@@ -8,11 +8,13 @@ public class MainMenu : MonoBehaviour
 {
     [SerializeField] private Button startButton;
     [SerializeField] private Button instructionsButton;
+    [SerializeField] private Button optionsButton;
     [SerializeField] private Button creditsButton;
     [SerializeField] private Button quitButton;
 
 
     [SerializeField] private GameObject instructions;
+    [SerializeField] private GameObject options;
     [SerializeField] private GameObject credits;
 
     protected void Start()
@@ -23,6 +25,10 @@ public class MainMenu : MonoBehaviour
         });
         instructionsButton.onClick.AddListener(() => {
             instructions.SetActive(true);
+            AudioManager.Instance.PlayClick();
+        });
+        optionsButton.onClick.AddListener(() => {
+            options.SetActive(true);
             AudioManager.Instance.PlayClick();
         });
         creditsButton.onClick.AddListener(() => {

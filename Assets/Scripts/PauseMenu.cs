@@ -8,10 +8,12 @@ public class PauseMenu : MonoBehaviour
     [SerializeField] private Button continueButton;
     [SerializeField] private Button newGameButton;
     [SerializeField] private Button mainMenuButton;
+    [SerializeField] private Button optionsButton;
     [SerializeField] private Button instructionsButton;
     [SerializeField] private Button quitButton;
 
     [SerializeField] private GameObject instructions;
+    [SerializeField] private GameObject options;
 
     protected void Start()
     {
@@ -25,6 +27,10 @@ public class PauseMenu : MonoBehaviour
         });
         mainMenuButton.onClick.AddListener(() => {
             SceneManager.LoadScene("Main Menu");
+            AudioManager.Instance.PlayClick();
+        });
+        optionsButton.onClick.AddListener(() => {
+            options.SetActive(true);
             AudioManager.Instance.PlayClick();
         });
         instructionsButton.onClick.AddListener(() => {
