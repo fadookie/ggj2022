@@ -6,19 +6,23 @@ using UnityEngine.UI;
 
 public class VolumeControl : MonoBehaviour
 {
-
     [SerializeField] private Slider slider;
-    private AudioMixerGroup audioMixerGroup;
+    [SerializeField] private TMPro.TextMeshProUGUI text;
+    private AudioMixer audioMixer;
+    private string parameter;
 
-    public void Setup(AudioMixerGroup audioMixerGroup)
+    public void Setup(AudioMixer audioMixer, string parameter)
     {
-        this.audioMixerGroup = audioMixerGroup;
-        //slider.value = audioMixerGroup.
+        this.audioMixer = audioMixer;
+        this.parameter = parameter;
+
+        audioMixer.GetFloat(parameter, out float volume);
+        slider.value = volume;
+        text.text = parameter + " Volume";
     }
 
     protected void Update()
     {
-        
+        audioMixer.SetFloat(parameter, slider.value);
     }
-
 }
