@@ -3,11 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Audio;
 
 public class AudioManager : MonoBehaviour
 {
     private static AudioManager instance;
     public static AudioManager Instance => instance;
+
+    public string[] VolumeParameters => volumeParameters;
+    public AudioMixer AudioMixer => audioMixer;
 
     [SerializeField] private AudioClip Click;
     [SerializeField] private AudioClip Possession;
@@ -20,6 +24,11 @@ public class AudioManager : MonoBehaviour
 
     [SerializeField] private AudioSource sfxPlayer;
     [SerializeField] private AudioSource musicPlayer;
+
+    [SerializeField] private AudioMixer audioMixer;
+
+
+    [SerializeField] private string[] volumeParameters;
 
     private Queue<AudioClip> MusicQueue;
     public bool PlayMusic { get; set; }
@@ -46,6 +55,21 @@ public class AudioManager : MonoBehaviour
 
         ShuffleMusicQueue();
         PlayMusic = true;
+
+        foreach (string volumeParameter in volumeParameters)
+        {
+            float volume; ;
+            if (PlayerPrefs.HasKey(volumeParameter))
+            {
+                volume = PlayerPrefs.GetFloat(volumeParameter);
+                audioMixer.SetFloat(volumeParameter, volume);
+            }
+            else
+            {
+                audioMixer.GetFloat(volumeParameter, out volume);
+                PlayerPrefs.SetFloat(volumeParameter, volume);
+            }
+        }
     }
 
     private void Update() {

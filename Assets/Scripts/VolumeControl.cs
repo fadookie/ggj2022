@@ -8,21 +8,23 @@ public class VolumeControl : MonoBehaviour
 {
     [SerializeField] private Slider slider;
     [SerializeField] private TMPro.TextMeshProUGUI text;
-    private AudioMixer audioMixer;
     private string parameter;
 
-    public void Setup(AudioMixer audioMixer, string parameter)
+    public void Setup(string parameter)
     {
-        this.audioMixer = audioMixer;
+        slider.minValue = -80;
+        slider.maxValue = 0;
+
         this.parameter = parameter;
 
-        audioMixer.GetFloat(parameter, out float volume);
+        AudioManager.Instance.AudioMixer.GetFloat(parameter, out float volume);
         slider.value = volume;
         text.text = parameter;
     }
 
     protected void Update()
     {
-        audioMixer.SetFloat(parameter, slider.value);
+        AudioManager.Instance.AudioMixer.SetFloat(parameter, slider.value);
+        PlayerPrefs.SetFloat(parameter, slider.value);
     }
 }

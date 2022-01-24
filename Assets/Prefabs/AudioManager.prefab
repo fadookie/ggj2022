@@ -61,6 +61,11 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 5dcd4ae7cfbfb43348de80a55b34bbc8, type: 3}
   sfxPlayer: {fileID: 5824368402400446981}
   musicPlayer: {fileID: 5824368402400447001}
+  audioMixer: {fileID: 24100000, guid: 52f22d58d46e143a29bcae6cb7df71c0, type: 2}
+  volumeParameters:
+  - Master Volume
+  - Music Volume
+  - SFX Volume
 --- !u!82 &5824368402400446981
 AudioSource:
   m_ObjectHideFlags: 0

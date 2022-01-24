@@ -6,13 +6,10 @@ using UnityEngine.UI;
 
 public class OptionsMenu : MonoBehaviour
 {
-    [SerializeField] private AudioMixer audioMixer;
 
     [SerializeField] private Button doneButton;
     [SerializeField] private VolumeControl volumeControlTemplate;
 
-    [SerializeField]
-    private string[] volumeParameters;
 
     private List<VolumeControl> volumeControls = new List<VolumeControl>();
 
@@ -27,6 +24,7 @@ public class OptionsMenu : MonoBehaviour
 
     protected void OnEnable()
     {
+        var volumeParameters = AudioManager.Instance.VolumeParameters;
         volumeControlTemplate.gameObject.SetActive(false);
         while (volumeControls.Count < volumeParameters.Length)
         {
@@ -34,7 +32,7 @@ public class OptionsMenu : MonoBehaviour
         }
         for(int i = 0; i< volumeParameters.Length; i++)
         {
-            volumeControls[i].Setup(audioMixer, volumeParameters[i]);
+            volumeControls[i].Setup(volumeParameters[i]);
             volumeControls[i].gameObject.SetActive(true);
         }
         for (int i = volumeParameters.Length; i < volumeControls.Count; i++)
