@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class AudioManager : MonoBehaviour
@@ -8,11 +9,16 @@ public class AudioManager : MonoBehaviour
     private static AudioManager instance;
     public static AudioManager Instance => instance;
 
-    public AudioClip Possession;
-    public AudioClip TakeDamage;
-    public AudioClip Death;
+    [SerializeField] private AudioClip Possession;
+    [SerializeField] private AudioClip TakeDamage;
+    [SerializeField] private AudioClip Death;
+    [SerializeField] private AudioClip[] Music;
 
-    private AudioSource player;
+    [SerializeField] private AudioSource sfxPlayer;
+    [SerializeField] private AudioSource musicPlayer;
+
+    private Queue<AudioClip> MusicQueue;
+    public bool PlayMusic { get; set; }
 
     public enum Sound
     {
@@ -31,7 +37,25 @@ public class AudioManager : MonoBehaviour
         DontDestroyOnLoad(this);
         instance = this;
 
-        player = GetComponent<AudioSource>();
+        ShuffleMusicQueue();
+        PlayMusic = true;
+    }
+
+    private void Update() {
+        if (PlayMusic && !musicPlayer.isPlaying) {
+            try {
+                var newClip = MusicQueue.Dequeue();
+                PlayMusicClip(newClip);
+            } catch (InvalidOperationException) {
+                ShuffleMusicQueue();
+            }
+        }
+    }
+
+    void ShuffleMusicQueue() {
+        var musicListShuffled = Music.ToList();
+        musicListShuffled.Shuffle();
+        MusicQueue = new Queue<AudioClip>(musicListShuffled);
     }
 
     public void PlaySound(Sound sound)
@@ -54,6 +78,11 @@ public class AudioManager : MonoBehaviour
 
     private void PlayClip(AudioClip clip)
     {
-        player.PlayOneShot(clip);
+        sfxPlayer.PlayOneShot(clip);
+    }
+    
+    private void PlayMusicClip(AudioClip clip)
+    {
+        musicPlayer.PlayOneShot(clip);
     }
 }
