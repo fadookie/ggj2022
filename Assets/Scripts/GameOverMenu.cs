@@ -13,10 +13,22 @@ public class GameOverMenu : MonoBehaviour
 
     protected void Start()
     {
-        newGameButton.onClick.AddListener(() => SceneManager.LoadScene("Game"));
-        mainMenuButton.onClick.AddListener(() => SceneManager.LoadScene("Main Menu"));
-        instructionsButton.onClick.AddListener(() => instructions.SetActive(true));
-        quitButton.onClick.AddListener(() => Application.Quit());
+        newGameButton.onClick.AddListener(() => {
+            SceneManager.LoadScene("Game");
+            AudioManager.Instance.PlayClick();
+        });
+        mainMenuButton.onClick.AddListener(() => {
+            SceneManager.LoadScene("Main Menu");
+            AudioManager.Instance.PlayClick();
+        });
+        instructionsButton.onClick.AddListener(() => {
+            instructions.SetActive(true);
+            AudioManager.Instance.PlayClick();
+        });
+        quitButton.onClick.AddListener(() => {
+            Application.Quit();
+            AudioManager.Instance.PlayClick();
+        });
     }
 
     protected void OnEnable()

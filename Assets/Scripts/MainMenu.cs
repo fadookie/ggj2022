@@ -17,9 +17,21 @@ public class MainMenu : MonoBehaviour
 
     protected void Start()
     {
-        startButton.onClick.AddListener(() => SceneManager.LoadScene("Game"));
-        instructionsButton.onClick.AddListener(() => instructions.SetActive(true));
-        creditsButton.onClick.AddListener(() => credits.SetActive(true));
-        quitButton.onClick.AddListener(() => Application.Quit());
+        startButton.onClick.AddListener(() => {
+            SceneManager.LoadScene("Game");
+            AudioManager.Instance.PlayClick();
+        });
+        instructionsButton.onClick.AddListener(() => {
+            instructions.SetActive(true);
+            AudioManager.Instance.PlayClick();
+        });
+        creditsButton.onClick.AddListener(() => {
+            credits.SetActive(true);
+            AudioManager.Instance.PlayClick();
+        });
+        quitButton.onClick.AddListener(() => {
+            Application.Quit();
+            AudioManager.Instance.PlayClick();
+        });
     }
 }

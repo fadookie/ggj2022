@@ -9,9 +9,13 @@ public class AudioManager : MonoBehaviour
     private static AudioManager instance;
     public static AudioManager Instance => instance;
 
+    [SerializeField] private AudioClip Click;
     [SerializeField] private AudioClip Possession;
     [SerializeField] private AudioClip TakeDamage;
     [SerializeField] private AudioClip Death;
+    [SerializeField] private AudioClip NPCAggro;
+    [SerializeField] private AudioClip NPCDeAggro;
+    
     [SerializeField] private AudioClip[] Music;
 
     [SerializeField] private AudioSource sfxPlayer;
@@ -22,9 +26,12 @@ public class AudioManager : MonoBehaviour
 
     public enum Sound
     {
+        Click,
         Possession,
         TakeDamage,
         Death,
+        NPCAggro,
+        NPCDeAggro,
     }
 
     void Awake()
@@ -58,19 +65,30 @@ public class AudioManager : MonoBehaviour
         MusicQueue = new Queue<AudioClip>(musicListShuffled);
     }
 
+    public void PlayClick() {
+        PlaySound(Sound.Click);
+    }
+
     public void PlaySound(Sound sound)
     {
+        PlayClip(GetAudioClip(sound));
+    }
+
+    public AudioClip GetAudioClip(Sound sound) {
         switch (sound)
         {
+            case Sound.Click:
+                return Click;
             case Sound.Possession:
-                PlayClip(Possession);
-                break;
+                return Possession;
             case Sound.TakeDamage:
-                PlayClip(TakeDamage);
-                break;
+                return TakeDamage;
             case Sound.Death:
-                PlayClip(Death);
-                break;
+                return Death;
+            case Sound.NPCAggro:
+                return NPCAggro;
+            case Sound.NPCDeAggro:
+                return NPCDeAggro;
             default:
                 throw new ArgumentOutOfRangeException(nameof(sound), sound, null);
         }

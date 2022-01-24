@@ -41,6 +41,7 @@ public class NPC : MonoBehaviour
     private CapsuleCollider capsuleCollider;
     private Collider groundCollider;
     [SerializeField] private CharacterSprite characterSprite;
+    [SerializeField] private AudioSource audioSource;
 
     private bool noticedPlayer;
     private bool wasCollidingWithPlayer;
@@ -60,6 +61,7 @@ public class NPC : MonoBehaviour
 
     protected void Start() {
         capsuleCollider = GetComponent<CapsuleCollider>();
+        audioSource = GetComponent<AudioSource>();
         if (Application.isPlaying) {
             var ground = GameObject.FindGameObjectWithTag("Ground");
             groundCollider = ground.GetComponent<MeshCollider>();
@@ -117,6 +119,9 @@ public class NPC : MonoBehaviour
                 {
                     if (aiState != AIState.Wander)
                     {
+                        if (aiState == AIState.Chase) {
+                            audioSource.PlayOneShot(AudioManager.Instance.GetAudioClip(AudioManager.Sound.NPCDeAggro));
+                        }
                         aiState = AIState.Wander;
                         sizeRoutine = SizePulse(Size, 1);
                     }
@@ -161,6 +166,7 @@ public class NPC : MonoBehaviour
                     {
                         aiState = AIState.Chase;
                         sizeRoutine = SizePulse(1.25f, 1f);
+                        audioSource.PlayOneShot(AudioManager.Instance.GetAudioClip(AudioManager.Sound.NPCAggro));
                     }
                     navMeshAgent.speed = chaseSpeed;
                     characterSprite.angry = true;

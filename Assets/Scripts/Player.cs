@@ -158,6 +158,7 @@ public class Player : MonoBehaviour
                     Debug.LogWarning($"OnNPCCollisionEnter NPC hit current timer: {ElapsedPossessionTime} new timer:{Time.time - (possessionStartTime - damageTimerReductionSec)}");
                     possessionStartTime -= damageTimerReductionSec;
                     // Timer rundown will be checked next update
+                    AudioManager.Instance.PlaySound(AudioManager.Sound.TakeDamage);
                 }
             } else {
                 StartCoroutine(DelayedSetPosition(npc.transform.position));
