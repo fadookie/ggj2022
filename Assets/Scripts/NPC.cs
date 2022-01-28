@@ -145,7 +145,7 @@ public class NPC : MonoBehaviour
                     if (aiState != AIState.Flee)
                     {
                         aiState = AIState.Flee;
-                        sizeRoutine = SizePulse(.85f, .85f);
+                        sizeRoutine = SizePulse(Size, .85f);
                     }
                     navMeshAgent.speed = fleeSpeed;
                     characterSprite.angry = false;

@@ -111,9 +111,10 @@ public class WorldGeneration : MonoBehaviour
         {
             return new Vector3(gridPosition.x + mapBounds.xMin, 0, gridPosition.y + mapBounds.yMin);
         }
+        GameColor lastWallColor = GameColor.Black;
         for (int i = 0; i < wallCount; i++)
         {
-            GameColor gameColor = GameColorUtil.GetRandomGameColor();
+            GameColor gameColor = lastWallColor.GetOpposite();
 
             int tries = 100;
             while (--tries > 0)
@@ -133,6 +134,7 @@ public class WorldGeneration : MonoBehaviour
                     MarkFilled(shapeGridBounds, gameColor);
                     var wall = ImprovedInstantiate(wallPrefab, GridToWorld(shapeGridBounds.center), wallParent);
                     wall.Setup(gameColor, new Vector3(shapeGridBounds.size.x, 1, shapeGridBounds.size.y));
+                    lastWallColor = gameColor;
                     break;
                 }
             }
