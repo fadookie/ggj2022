@@ -17,30 +17,12 @@ public class PauseMenu : MonoBehaviour
 
     protected void Start()
     {
-        continueButton.onClick.AddListener(() => {
-            gameObject.SetActive(false);
-            AudioManager.Instance.PlayClick();
-        });
-        newGameButton.onClick.AddListener(() => {
-            SceneManager.LoadScene("Game");
-            AudioManager.Instance.PlayClick();
-        });
-        mainMenuButton.onClick.AddListener(() => {
-            SceneManager.LoadScene("Main Menu");
-            AudioManager.Instance.PlayClick();
-        });
-        optionsButton.onClick.AddListener(() => {
-            options.SetActive(true);
-            AudioManager.Instance.PlayClick();
-        });
-        instructionsButton.onClick.AddListener(() => {
-            instructions.SetActive(true);
-            AudioManager.Instance.PlayClick();
-        });
-        quitButton.onClick.AddListener(() => {
-            Application.Quit();
-            AudioManager.Instance.PlayClick();
-        });
+        continueButton.onClick.AddListener(() => gameObject.SetActive(false));
+        newGameButton.onClick.AddListener(() => SceneManager.LoadScene("Game"));
+        mainMenuButton.onClick.AddListener(() => SceneManager.LoadScene("Main Menu"));
+        optionsButton.onClick.AddListener(() => options.SetActive(true));
+        instructionsButton.onClick.AddListener(() => instructions.SetActive(true));
+        quitButton.onClick.AddListener(() => Application.Quit());
     }
 
     protected void OnEnable()

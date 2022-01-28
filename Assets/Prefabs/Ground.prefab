@@ -207,7 +207,7 @@ MonoBehaviour:
   wallMaxLength: 10
   npcParent: {fileID: 0}
   npcPrefab: {fileID: 893219991063181493, guid: a4fb7a07f893ba0449630518df82e277, type: 3}
-  npcPerXSquareUnits: 100
+  npcPerXSquareUnits: 50
   mapSize: {x: 100, y: 100}
   built: 0
 --- !u!114 &1599742926

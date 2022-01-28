@@ -120,9 +120,9 @@ MonoBehaviour:
   m_ChildAlignment: 1
   m_Spacing: 5
   m_ChildForceExpandWidth: 1
-  m_ChildForceExpandHeight: 0
+  m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 1
-  m_ChildControlHeight: 0
+  m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
@@ -408,6 +408,7 @@ GameObject:
   - component: {fileID: 613893001429373535}
   - component: {fileID: 7282860030863047028}
   - component: {fileID: 1095367128101184522}
+  - component: {fileID: 3072945894127653892}
   m_Layer: 5
   m_Name: Done Button
   m_TagString: Untagged
@@ -433,7 +434,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 40}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &410376204175820897
 CanvasRenderer:
@@ -587,6 +588,18 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &3072945894127653892
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1937612109099077724}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f6a399ac76028746bd17e7e29b20db3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2989476007167089440
 GameObject:
   m_ObjectHideFlags: 0
@@ -904,20 +917,20 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'You must touch and possess your enemies of the opposite color before your
-    time runs out!
+  m_text: 'Using the WASD keys you must touch and possess your enemies of the opposite
+    color before your time runs out!
 
 
-    When enemies of the same color hit you, it takes some of
-    your time away.
+    When enemies of the same color hit you,
+    it takes some of your time away.
 
 
-    When you take over a new body, your prey become your predators
-    and vice versa, and you get more time.
+    When you take over a new body, your prey
+    become your predators and vice versa, and you get more time.
 
 
-    You (and enemies) can phase through
-    walls that match your color.
+    You (and enemies)
+    can phase through walls that match your color.
 
 
     See how long you can survive!'

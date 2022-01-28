@@ -30,6 +30,12 @@ public class AudioManager : MonoBehaviour
 
     [SerializeField] private string[] volumeParameters;
 
+
+    private float musicPitchChangeVelocity;
+    private float musicPitchChangeGoal = 1;
+    private float musicPitchChangeSmoothness = 0;
+    private float musicPitchLast = 1;
+
     private Queue<AudioClip> MusicQueue;
     public bool PlayMusic { get; set; }
 
@@ -81,12 +87,20 @@ public class AudioManager : MonoBehaviour
                 ShuffleMusicQueue();
             }
         }
+        musicPitchLast = Mathf.SmoothDamp(musicPitchLast, musicPitchChangeGoal, ref musicPitchChangeVelocity, musicPitchChangeSmoothness, 9999, Time.unscaledDeltaTime);
+        musicPlayer.pitch = musicPitchLast;
     }
 
     void ShuffleMusicQueue() {
         var musicListShuffled = Music.ToList();
         musicListShuffled.Shuffle();
         MusicQueue = new Queue<AudioClip>(musicListShuffled);
+    }
+
+    public void SetMusicPitch(float pitch, float smoothness)
+    {
+        musicPitchChangeGoal = pitch;
+        musicPitchChangeSmoothness = smoothness;
     }
 
     public void PlayClick() {

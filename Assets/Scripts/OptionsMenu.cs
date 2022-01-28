@@ -16,7 +16,6 @@ public class OptionsMenu : MonoBehaviour
     protected IEnumerator Start()
     {
         doneButton.onClick.AddListener(() => gameObject.SetActive(false));
-        yield return null;
         volumeControlTemplate.transform.parent.gameObject.SetActive(false);
         yield return null;
         volumeControlTemplate.transform.parent.gameObject.SetActive(true);
@@ -39,11 +38,5 @@ public class OptionsMenu : MonoBehaviour
         {
             volumeControls[i].gameObject.SetActive(false);
         }
-        Time.timeScale = 0;
-    }
-
-    protected void OnDisable()
-    {
-        Time.timeScale = 1;
     }
 }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UniRx;
 using UnityEngine.Jobs;
+using System.Linq;
 
 [RequireComponent(typeof(CharacterSprite))]
 public class Player : MonoBehaviour
@@ -58,6 +59,7 @@ public class Player : MonoBehaviour
         characterSprite.possessed = true;
         currentColor.Subscribe(OnColorChange);
         possessionStartTime = Time.time;
+        AudioManager.Instance.SetMusicPitch(1, 0);
     }
     
     protected void Update()
@@ -80,6 +82,10 @@ public class Player : MonoBehaviour
 //            Debug.Log($"time:{Time.time} posStartTime:{possessionStartTime} duration:{Time.time - possessionStartTime}");
             if (ElapsedPossessionTime > possessionTimerDurationSec) {
                 Die();
+            }
+            else
+            {
+                AudioManager.Instance.SetMusicPitch(1 + Mathf.Pow(ElapsedPossessionTime / possessionTimerDurationSec, 2)/2f, .5f);
             }
         }
     }
@@ -108,6 +114,8 @@ public class Player : MonoBehaviour
 
     private IEnumerator DeathSequence()
     {
+        float duration = 2;
+        AudioManager.Instance.SetMusicPitch(0, duration);
         GameUI gameUI = FindObjectOfType<GameUI>();
 
         gameUI.DeathFade.gameObject.SetActive(true);
@@ -117,7 +125,6 @@ public class Player : MonoBehaviour
         gameUI.DeathFade.color = color;
 
         float startTime = Time.time;
-        float duration = 2;
         while(Time.time < startTime + duration)
         {
             color.a = Mathf.Lerp(0, goalAlpha, (Time.time - startTime) / duration);
@@ -128,6 +135,7 @@ public class Player : MonoBehaviour
         gameUI.DeathFade.color = color;
         gameUI.DeathFade.gameObject.SetActive(false);
         gameUI.GameOverMenu.gameObject.SetActive(true);
+        AudioManager.Instance.SetMusicPitch(1, 1);
     }
 
     private void OnColorChange(GameColor color)
@@ -164,7 +172,8 @@ public class Player : MonoBehaviour
                 StartCoroutine(DelayedSetPosition(npc.transform.position));
                 currentColor.Value = npc.Color;
                 if (ScoreTracker.TryGetInstance(out var scoreTracker)) {
-                    scoreTracker.Score += 1;
+                    scoreTracker.Score += 1; 
+                    possessionTimerDurationSec *= .9f;
                 }
                 npc.Die();
                 possessionStartTime = Time.time;

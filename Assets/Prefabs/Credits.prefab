@@ -192,12 +192,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'Jim Niehues - Design and Programming
 
-    
-
-    Eliot Lash - Design,
-    Programming, Sound Design
-
-    
+    Eliot Lash - Design, Programming,
+    Sound Design
 
     Aaron Belman - Sprite Art'
   m_isRightToLeft: 0
@@ -238,7 +234,7 @@ MonoBehaviour:
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
-  m_lineSpacing: 0
+  m_lineSpacing: 50
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
@@ -262,7 +258,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 10, y: 10, z: 10, w: 10}
+  m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -681,6 +677,7 @@ GameObject:
   - component: {fileID: 8738938209733997513}
   - component: {fileID: 1500794829707729122}
   - component: {fileID: 9147242916498883996}
+  - component: {fileID: 6614985578566449138}
   m_Layer: 5
   m_Name: Done Button
   m_TagString: Untagged
@@ -706,7 +703,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 40}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8391328248997341687
 CanvasRenderer:
@@ -860,6 +857,18 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &6614985578566449138
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7719672908449788362}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f6a399ac76028746bd17e7e29b20db3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8775616058322967046
 GameObject:
   m_ObjectHideFlags: 0
@@ -980,9 +989,9 @@ MonoBehaviour:
   m_ChildAlignment: 1
   m_Spacing: 5
   m_ChildForceExpandWidth: 1
-  m_ChildForceExpandHeight: 0
+  m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 1
-  m_ChildControlHeight: 0
+  m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0

@@ -19,25 +19,15 @@ public class MainMenu : MonoBehaviour
 
     protected void Start()
     {
-        startButton.onClick.AddListener(() => {
-            SceneManager.LoadScene("Game");
-            AudioManager.Instance.PlayClick();
-        });
-        instructionsButton.onClick.AddListener(() => {
-            instructions.SetActive(true);
-            AudioManager.Instance.PlayClick();
-        });
-        optionsButton.onClick.AddListener(() => {
-            options.SetActive(true);
-            AudioManager.Instance.PlayClick();
-        });
-        creditsButton.onClick.AddListener(() => {
-            credits.SetActive(true);
-            AudioManager.Instance.PlayClick();
-        });
-        quitButton.onClick.AddListener(() => {
-            Application.Quit();
-            AudioManager.Instance.PlayClick();
-        });
+        startButton.onClick.AddListener(() => SceneManager.LoadScene("Game"));
+        instructionsButton.onClick.AddListener(() => instructions.SetActive(true));
+        optionsButton.onClick.AddListener(() => options.SetActive(true));
+        creditsButton.onClick.AddListener(() => credits.SetActive(true));
+        quitButton.onClick.AddListener(() => Application.Quit());
+    }
+
+    protected void OnEnable()
+    {
+        AudioManager.Instance.SetMusicPitch(1, 1);
     }
 }

@@ -147,6 +147,7 @@ GameObject:
   - component: {fileID: 4189814657273853293}
   - component: {fileID: 978615124735057645}
   - component: {fileID: 8263867880781514792}
+  - component: {fileID: 8530726974854116884}
   m_Layer: 5
   m_Name: Options Button
   m_TagString: Untagged
@@ -276,6 +277,18 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: 0
   m_LayoutPriority: 1
+--- !u!114 &8530726974854116884
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 623058490286982070}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f6a399ac76028746bd17e7e29b20db3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &926471826027074795
 GameObject:
   m_ObjectHideFlags: 0
@@ -413,6 +426,7 @@ GameObject:
   - component: {fileID: 7988463800732283351}
   - component: {fileID: 5853491168399921786}
   - component: {fileID: 6324937103617481646}
+  - component: {fileID: 5495586764481787458}
   m_Layer: 5
   m_Name: New Game Button
   m_TagString: Untagged
@@ -542,6 +556,18 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: 0
   m_LayoutPriority: 1
+--- !u!114 &5495586764481787458
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1015443590722899493}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f6a399ac76028746bd17e7e29b20db3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1407135826382477415
 GameObject:
   m_ObjectHideFlags: 0
@@ -555,6 +581,7 @@ GameObject:
   - component: {fileID: 1513266316517381560}
   - component: {fileID: 8562331877264487087}
   - component: {fileID: 4454985364645192514}
+  - component: {fileID: 5270442522665463833}
   m_Layer: 5
   m_Name: Continue Button
   m_TagString: Untagged
@@ -684,6 +711,18 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: 0
   m_LayoutPriority: 1
+--- !u!114 &5270442522665463833
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1407135826382477415}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f6a399ac76028746bd17e7e29b20db3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2190249145988127417
 GameObject:
   m_ObjectHideFlags: 0
@@ -697,6 +736,7 @@ GameObject:
   - component: {fileID: 5824835192256768076}
   - component: {fileID: 1623226467484897745}
   - component: {fileID: 5123986324458447886}
+  - component: {fileID: 195954962546674547}
   m_Layer: 5
   m_Name: Instructions Button
   m_TagString: Untagged
@@ -826,6 +866,18 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: 0
   m_LayoutPriority: 1
+--- !u!114 &195954962546674547
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2190249145988127417}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f6a399ac76028746bd17e7e29b20db3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2315602816955834598
 GameObject:
   m_ObjectHideFlags: 0
@@ -1969,6 +2021,7 @@ GameObject:
   - component: {fileID: 3635797958067693943}
   - component: {fileID: 5279013422797480092}
   - component: {fileID: 264062627375369756}
+  - component: {fileID: 5401370497767371494}
   m_Layer: 5
   m_Name: Main Menu Button
   m_TagString: Untagged
@@ -2098,6 +2151,18 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: 0
   m_LayoutPriority: 1
+--- !u!114 &5401370497767371494
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7958204293425154602}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f6a399ac76028746bd17e7e29b20db3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8532802821138003109
 GameObject:
   m_ObjectHideFlags: 0
@@ -2208,6 +2273,7 @@ GameObject:
   - component: {fileID: 4728241375648094108}
   - component: {fileID: 6295969026923994625}
   - component: {fileID: 5167435718626834421}
+  - component: {fileID: 7046625469524220860}
   m_Layer: 5
   m_Name: Quit Button
   m_TagString: Untagged
@@ -2337,3 +2403,15 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: 0
   m_LayoutPriority: 1
+--- !u!114 &7046625469524220860
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8891442786999043605}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f6a399ac76028746bd17e7e29b20db3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
