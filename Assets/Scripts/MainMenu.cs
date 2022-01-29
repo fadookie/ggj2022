@@ -28,6 +28,7 @@ public class MainMenu : MonoBehaviour
 
     protected void OnEnable()
     {
-        AudioManager.Instance.SetMusicPitch(1, 1);
+        AudioManager.Instance.NormalMusic();
+
     }
 }

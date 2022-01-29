@@ -30,14 +30,10 @@ public class AudioManager : MonoBehaviour
 
     [SerializeField] private string[] volumeParameters;
 
-
-    private float musicPitchChangeVelocity;
-    private float musicPitchChangeGoal = 1;
-    private float musicPitchChangeSmoothness = 0;
-    private float musicPitchLast = 1;
-
     private Queue<AudioClip> MusicQueue;
     public bool PlayMusic { get; set; }
+
+    private IEnumerator musicControlRoutine; 
 
     public enum Sound
     {
@@ -87,20 +83,21 @@ public class AudioManager : MonoBehaviour
                 ShuffleMusicQueue();
             }
         }
-        musicPitchLast = Mathf.SmoothDamp(musicPitchLast, musicPitchChangeGoal, ref musicPitchChangeVelocity, musicPitchChangeSmoothness, 9999, Time.unscaledDeltaTime);
-        musicPlayer.pitch = musicPitchLast;
+        if(musicControlRoutine != null)
+        {
+            if(!musicControlRoutine.MoveNext())
+            {
+                musicControlRoutine = null;
+            }
+        }
     }
+
+
 
     void ShuffleMusicQueue() {
         var musicListShuffled = Music.ToList();
         musicListShuffled.Shuffle();
         MusicQueue = new Queue<AudioClip>(musicListShuffled);
-    }
-
-    public void SetMusicPitch(float pitch, float smoothness)
-    {
-        musicPitchChangeGoal = pitch;
-        musicPitchChangeSmoothness = smoothness;
     }
 
     public void PlayClick() {
@@ -140,5 +137,79 @@ public class AudioManager : MonoBehaviour
     private void PlayMusicClip(AudioClip clip)
     {
         musicPlayer.PlayOneShot(clip);
+    }
+
+    public void DeathMusic(float overPeriod)
+    {
+        musicControlRoutine = DeathMusicRoutine(overPeriod);
+    }
+
+    private IEnumerator DeathMusicRoutine(float overPeriod)
+    {
+        float initialPitch = musicPlayer.pitch;
+        float initialVolume = musicPlayer.volume;
+
+        float startTime = Time.unscaledTime;
+        while (Time.unscaledTime < startTime + overPeriod)
+        {
+            float lerp = (Time.unscaledTime - startTime) / overPeriod;
+            musicPlayer.pitch = Mathf.Lerp(initialPitch, 0, lerp);
+            musicPlayer.volume = Mathf.Lerp(initialVolume, 0, lerp);
+            yield return null;
+        }
+
+        musicPlayer.volume = 0;
+        musicPlayer.pitch = 0;
+
+        var sub = NormalMusicRoutine();
+        while (sub.MoveNext())
+        {
+            yield return sub.Current;
+        }
+    }
+
+    public void PlayerMusic(Player player)
+    {
+        musicControlRoutine = PlayerMusicRoutine(player);
+    }
+
+    private IEnumerator PlayerMusicRoutine(Player player)
+    {
+        float initialPitch = musicPlayer.pitch;
+        float initialVolume = musicPlayer.volume;
+        float pitchVelo = 0;
+        float volumeVelo = 0;
+        while (true)
+        {
+            float pitchGoal = 1 + Mathf.Pow(player.ElapsedPossessionTime / player.PossessionTimerDurationSec, 2) / 2f;
+            musicPlayer.pitch = Mathf.SmoothDamp(musicPlayer.pitch, pitchGoal, ref pitchVelo, .5f, 9999, Time.unscaledDeltaTime);
+
+            musicPlayer.volume = Mathf.SmoothDamp(musicPlayer.volume, 1, ref volumeVelo, 1, 9999, Time.unscaledDeltaTime);
+
+            yield return null;
+        }
+    }
+
+    public void NormalMusic()
+    {
+        musicControlRoutine = NormalMusicRoutine();
+    }
+
+    private IEnumerator NormalMusicRoutine()
+    {
+        if(musicPlayer.volume == 0)
+        {
+            musicPlayer.pitch = 1;
+        }
+        float pitchVelo = 0;
+        float volumeVelo = 0;
+        while (true)
+        {
+            musicPlayer.pitch = Mathf.SmoothDamp(musicPlayer.pitch, 1, ref pitchVelo, 1, 9999, Time.unscaledDeltaTime);
+
+            musicPlayer.volume = Mathf.SmoothDamp(musicPlayer.volume, 1, ref volumeVelo, 1, 9999, Time.unscaledDeltaTime);
+
+            yield return null;
+        }
     }
 }

@@ -59,7 +59,7 @@ public class Player : MonoBehaviour
         characterSprite.possessed = true;
         currentColor.Subscribe(OnColorChange);
         possessionStartTime = Time.time;
-        AudioManager.Instance.SetMusicPitch(1, 0);
+        AudioManager.Instance.PlayerMusic(this);
     }
     
     protected void Update()
@@ -83,10 +83,6 @@ public class Player : MonoBehaviour
             if (ElapsedPossessionTime > possessionTimerDurationSec) {
                 Die();
             }
-            else
-            {
-                AudioManager.Instance.SetMusicPitch(1 + Mathf.Pow(ElapsedPossessionTime / possessionTimerDurationSec, 2)/2f, .5f);
-            }
         }
     }
 
@@ -108,6 +104,7 @@ public class Player : MonoBehaviour
             dead = true;
             AudioManager.Instance.PlaySound(AudioManager.Sound.Death);
             Debug.LogWarning($"Player died. time:{Time.time} posStartTime:{possessionStartTime} duration:{ElapsedPossessionTime}");
+            AudioManager.Instance.DeathMusic(2);
             StartCoroutine(DeathSequence());
         }
     }
@@ -115,7 +112,6 @@ public class Player : MonoBehaviour
     private IEnumerator DeathSequence()
     {
         float duration = 2;
-        AudioManager.Instance.SetMusicPitch(0, duration);
         GameUI gameUI = FindObjectOfType<GameUI>();
 
         gameUI.DeathFade.gameObject.SetActive(true);
@@ -127,7 +123,8 @@ public class Player : MonoBehaviour
         float startTime = Time.time;
         while(Time.time < startTime + duration)
         {
-            color.a = Mathf.Lerp(0, goalAlpha, (Time.time - startTime) / duration);
+            float lerp = (Time.time - startTime) / duration;
+            color.a = Mathf.Lerp(0, goalAlpha, lerp);
             gameUI.DeathFade.color = color;
             yield return null;
         }
@@ -135,7 +132,6 @@ public class Player : MonoBehaviour
         gameUI.DeathFade.color = color;
         gameUI.DeathFade.gameObject.SetActive(false);
         gameUI.GameOverMenu.gameObject.SetActive(true);
-        AudioManager.Instance.SetMusicPitch(1, 1);
     }
 
     private void OnColorChange(GameColor color)
